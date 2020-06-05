@@ -54,7 +54,6 @@ share/
 include/darknet/
 uselib
 uselib_track
-darknet
 
 # weights files
 yolov4.weights

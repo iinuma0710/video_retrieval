@@ -2,11 +2,11 @@
 物体検出(YOLO v4)と動作認識(SlowFast Networks)を用いて映像の特徴量を抽出し映像検索を行う．
 
 ## ディレクトリの構成
-/video_retrieval
-  |- /darknet
-  |- /slowfast
-  |- /sort
-  |- 
+/video_retrieval  
+  |- /darknet  
+  |- /slowfast  
+  |- /sort  
+  |-   
 
 ## YOLO v4
 映像中の人物領域のみを切り出す．

@@ -456,7 +456,7 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
             print("Unable to show image: "+str(e))
     return detections
 
-def performBatchDetect(thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath = "yolov4.weights", metaPath= "./cfg/coco.data", hier_thresh=.5, nms=.45, batch_size=3):
+def performBatchDetect(thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath = "./weights/yolov4.weights", metaPath= "./cfg/coco.data", hier_thresh=.5, nms=.45, batch_size=3):
     import cv2
     import numpy as np
     # NB! Image sizes should be the same
@@ -522,6 +522,7 @@ def performBatchDetect(thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath
     return batch_boxes, batch_scores, batch_classes    
 
 if __name__ == "__main__":
-    print(performDetect())
-    #Uncomment the following line to see batch inference working 
-    #print(performBatchDetect())
+    # print(performDetect())
+    #Uncomment the following line to see batch inference working
+    import pprint
+    pprint.pprint(performBatchDetect())

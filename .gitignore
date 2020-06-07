@@ -57,3 +57,6 @@ uselib_track
 
 # weights files
 yolov4.weights
+
+# jupyter notebook
+jupyter/.ipynb_checkpoints/

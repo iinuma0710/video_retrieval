@@ -175,7 +175,7 @@ class Darknet(object):
         detections : 検出結果
     """
 
-    def __init__(self, config_file, weight_file, meta_file, batch_size=32, thresh= 0.25, hier_thresh=.5, nms=.45):
+    def __init__(self, config_file, weight_file, meta_file, batch_size=16, thresh= 0.25, hier_thresh=.5, nms=.45):
         self.config_file = config_file
         self.weight_file = weight_file
         self.meta_file = meta_file
@@ -226,6 +226,7 @@ class Darknet(object):
                     score = p
                     label = c
 
+            print(i, score, label, det.bbox.x, det.bbox.y, det.bbox.w, det.bbox.h)
             # バウンディングボックスのクラス，スコア，座標を計算
             if score > self.thresh:
                 box = det.bbox
@@ -243,8 +244,8 @@ class Darknet(object):
         for idx in range(self.batch_size):
             num = batch_dets[idx].num
             dets = batch_dets[idx].dets
-            if self.nms:
-                do_nms_obj(dets, num, self.meta.classes, self.nms)
+            # if self.nms:
+            #     do_nms_obj(dets, num, self.meta.classes, self.nms)
             
             boxes, scores, classes = self._get_bboxes(dets, num)
             batch_boxes.append(boxes)
@@ -253,8 +254,21 @@ class Darknet(object):
 
         return batch_boxes, batch_scores, batch_classes
 
+    
+    def detect(self, image):
+        pred_height, pred_width, c = image.shape
+        net_width, net_height = (network_width(self.net), network_height(self.net))
+        imgs = self._resize_images([image], net_height, net_width, c)
 
-    def detect(self, images):
+        dets = predict_image(self.net, imgs[0])
+        bboxes, scores, classes = self._parse_detections(dets)
+
+        free_batch_detections(dets, self.batch_size)
+
+        return bboxes, scores, classes
+
+
+    def detect_batch(self, images):
         # images はフレーム画像のバッチ，画像はすべて同じサイズでなければならない
         # images は [横, 縦, チャネル数, バッチサイズ] の4次元テンソル
         
@@ -287,5 +301,5 @@ if __name__ == "__main__":
     )
     img_samples = ['./darknet/data/person.jpg', './darknet/data/person.jpg', './darknet/data/person.jpg']
     image_list = [cv2.cvtColor(cv2.imread(k), cv2.COLOR_BGR2RGB) for k in img_samples]
-    pprint.pprint(detector.detect(image_list))
+    pprint.pprint(detector.detect_batch(image_list))
 

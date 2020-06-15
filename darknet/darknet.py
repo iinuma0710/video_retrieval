@@ -313,7 +313,7 @@ netMain = None
 metaMain = None
 altNames = None
 
-def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath = "./weights/yolov4.weights", metaPath= "./cfg/coco.data", showImage= True, makeImageOnly = False, initOnly= False):
+def performDetect(imagePath="../imgs/test30.jpg", thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath = "./weights/yolov4.weights", metaPath= "./cfg/coco.data", showImage= True, makeImageOnly = False, initOnly= False):
     """
     Convenience function to handle the detection and returns of objects.
 
@@ -461,7 +461,9 @@ def performBatchDetect(thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath
     import numpy as np
     # NB! Image sizes should be the same
     # You can change the images, yet, be sure that they have the same width and height
-    img_samples = ['data/person.jpg', 'data/person.jpg', 'data/person.jpg']
+    # img_samples = ['data/person.jpg', 'data/dog.jpg', 'data/scream.jpg']
+    # img_samples = ['data/test1.jpg', 'data/test2.jpg', 'data/test3.jpg']
+    img_samples = ['../imgs/test10.jpg', '../imgs/test20.jpg', '../imgs/test30.jpg']
     image_list = [cv2.imread(k) for k in img_samples]
 
     net = load_net_custom(configPath.encode('utf-8'), weightPath.encode('utf-8'), 0, batch_size)
@@ -515,6 +517,7 @@ def performBatchDetect(thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath
                           (right, bottom), boxColor, 2)
         cv2.imwrite(os.path.basename(img_samples[b]),image_list[b])
 
+        print(boxes)
         batch_boxes.append(boxes)
         batch_scores.append(scores)
         batch_classes.append(classes)
@@ -522,7 +525,6 @@ def performBatchDetect(thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath
     return batch_boxes, batch_scores, batch_classes    
 
 if __name__ == "__main__":
-    # print(performDetect())
-    #Uncomment the following line to see batch inference working
     import pprint
-    pprint.pprint(performBatchDetect())
+    pprint.pprint(performDetect())
+    # pprint.pprint(performBatchDetect())

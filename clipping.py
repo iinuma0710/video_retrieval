@@ -42,6 +42,7 @@ def clip_video(video_path):
     video_clip_list = []
     for frame_indexes in frame_idx_list:
         frame_images = [cv2.cvtColor(frame_image_list[idx], cv2.COLOR_BGR2RGB) for idx in frame_indexes]
+        # frame_images = [frame_image_list[idx] for idx in frame_indexes]
         video_clip_list.append(frame_images)
         
     return video_clip_list

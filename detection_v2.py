@@ -8,7 +8,9 @@ Darknet の詳細は https://github.com/AlexeyAB/darknet を参照
 """
 
 import cv2
+import numpy as np
 from darknet import *
+from sort.sort import *
 
 
 # ネットワークの読み込み
@@ -41,31 +43,48 @@ def detect_image(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
             if dets[j].prob[i] > 0:
                 b = dets[j].bbox
                 nameTag = meta.names[i]
-                res.append((nameTag, dets[j].prob[i], (b.x, b.y, b.w, b.h)))
-    res = sorted(res, key=lambda x: -x[1])
+                if nameTag == b'person':
+                    x1 = b.x - b.w / 2
+                    y1 = b.y - b.h / 2
+                    x2 = b.x + b.w / 2
+                    y2 = b.y + b.h / 2
+                    res.append([x1, y1, x2, y2, dets[j].prob[i]])
+                # res.append((nameTag, dets[j].prob[i], (b.x, b.y, b.w, b.h)))
+    # res = sorted(res, key=lambda x: -x[1])
     free_detections(dets, num)
     return res
 
 
 def detect_video(net, meta, video):
+    # 映像ファイルの読み込み
     cap = cv2.VideoCapture(video)
+    # 入力画像の雛形
     darknet_image = make_image(network_width(net), network_height(net), 3)
-    
+    # SORT によるトラッキングの初期化
+    sort_tracker = Sort()
+
     frame_cnt = 0
     while True:
+        # フレーム画像のキャプチャ
         ret, frame = cap.read()
         if ret:
+            # フレーム画像の前処理
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame_resized = cv2.resize(frame_rgb, (network_width(net), network_height(net)), interpolation=cv2.INTER_LINEAR)
             copy_image_from_bytes(darknet_image, frame_resized.tobytes())
+            # 検出
             dets = detect_image(net, meta, darknet_image, thresh=0.25)
+            # トラッキング
+            dets = np.array(dets) if dets != [] else np.empty((0, 5))
+            dets_track = sort_tracker.update(dets)
 
-            people = []
-            for det in dets:
-                if det[0] == b'person':
-                    people.append(det)
+            # people = []
+            # for det in dets:
+            #     if det[0] == b'person':
+            #         people.append(det)
 
-            print(frame_cnt, people)
+            # print(frame_cnt, people)
+            print(frame_cnt, dets_track)
             frame_cnt += 1
         else:
             break

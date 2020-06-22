@@ -60,3 +60,6 @@ yolov4.weights
 
 # jupyter notebook
 jupyter/.ipynb_checkpoints/
+
+# pyth ファイル (モデルを保存したファイル)
+*.pyth

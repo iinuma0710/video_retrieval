@@ -10,6 +10,7 @@
 *.lib
 *.dylib
 *.log
+*.mp4
 mnist/
 data/
 caffe/

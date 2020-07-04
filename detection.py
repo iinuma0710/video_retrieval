@@ -73,12 +73,10 @@ def read_video(video):
     return h, w, frame_num, fps, frames
 
 
-def write_video(video, frames, fps, min_x, min_y, max_x, max_y):
-    frames_resized = [f[min_y:max_y, min_x:max_x] for f in frames]
-
+def write_video(video, frames, fps, w, h):
     fourcc = cv2.VideoWriter_fourcc('m','p','4', 'v')
-    mv = cv2.VideoWriter(video, fourcc, fps, (max_x - min_x, max_y - min_y))
-    for f in frames_resized:
+    mv = cv2.VideoWriter(video, fourcc, fps, (w, h))
+    for f in frames:
         mv.write(f)
     mv.release()
 
@@ -108,7 +106,10 @@ def get_video_small_area(input_video, output_video, cx, cy, clip_w, clip_h):
         max_y = int(cy + clip_h / 2)
 
     print(output_video, "(min_x, min_y, max_x, max_y) : ", (min_x, min_y, max_x, max_y))
-    write_video(output_video, frames, fps, min_x, min_y, max_x, max_y)
+
+    # 画像をリサイズして映像に書き出す
+    frames_resized = [f[min_y:max_y, min_x:max_x] for f in frames]
+    write_video(output_video, frames_resized, fps, max_x - min_x, max_y - min_y)
 
 
 def get_video_big_area(input_video, output_video, cx, cy, person_w, person_h, clip_w, clip_h):

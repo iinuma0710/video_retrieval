@@ -43,7 +43,7 @@ def YOLO():
 
     global metaMain, netMain, altNames
     configPath = "./cfg/yolov4.cfg"
-    weightPath = "./yolov4.weights"
+    weightPath = "./weights/yolov4.weights"
     metaPath = "./cfg/coco.data"
     if not os.path.exists(configPath):
         raise ValueError("Invalid config path `" +
@@ -80,12 +80,14 @@ def YOLO():
         except Exception:
             pass
     #cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture("test.mp4")
+    # cap = cv2.VideoCapture("test.mp4")
+    cap = cv2.VideoCapture("/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics700/video/val/geocaching/_qJxV4JtSmA.mp4")
     cap.set(3, 1280)
     cap.set(4, 720)
     out = cv2.VideoWriter(
         "output.avi", cv2.VideoWriter_fourcc(*"MJPG"), 10.0,
         (darknet.network_width(netMain), darknet.network_height(netMain)))
+    print("movie_size : ", (darknet.network_width(netMain), darknet.network_height(netMain)))
     print("Starting the YOLO loop...")
 
     # Create an image we reuse for each detect

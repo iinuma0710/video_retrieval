@@ -45,6 +45,7 @@ def detect_image(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
                 b = dets[j].bbox
                 nameTag = meta.names[i]
                 if nameTag == b'person':
+                    print(b.x, b.y, b.w, b.h)
                     x1 = b.x - b.w / 2
                     y1 = b.y - b.h / 2
                     x2 = b.x + b.w / 2
@@ -98,14 +99,14 @@ def get_video_small_area(input_video, output_video, cx, cy, clip_w, clip_h):
     if cy + clip_h / 2 > original_h:
         min_y = int(max(0, original_h - clip_h))
         max_y = int(original_h)
-    elif ch - clip_h / 2 < 0:
+    elif cy - clip_h / 2 < 0:
         min_y = 0
         max_y = int(min(original_h, clip_h))
     else:
         min_y = int(cy - clip_h / 2)
         max_y = int(cy + clip_h / 2)
 
-    print(output_video, "(min_x, min_y, max_x, max_y) : ", (min_x, min_y, max_x, max_y))
+    print("small area (min_x, min_y, max_x, max_y) : ", (min_x, min_y, max_x, max_y))
 
     # 画像をリサイズして映像に書き出す
     frames_resized = [f[min_y:max_y, min_x:max_x] for f in frames]
@@ -113,7 +114,22 @@ def get_video_small_area(input_video, output_video, cx, cy, clip_w, clip_h):
 
 
 def get_video_big_area(input_video, output_video, cx, cy, person_w, person_h, clip_w, clip_h):
-    pass
+    original_h, original_w, frame_num, fps, frames = read_video(input_video)
+
+    # 切り出し範囲の計算
+    min_x = int(max(0, cx - person_w / 2))
+    max_x = int(min(original_w, cx + person_w / 2))
+    min_y = int(max(0, cy - person_h / 2))
+    max_y = int(min(original_h, cy + person_h / 2))
+    print("big area (min_x, min_y, max_x, max_y) : ", (min_x, min_y, max_x, max_y))
+
+    # フレーム画像の切り出し
+    frames_cliped = [f[min_y:max_y, min_x:max_x] for f in frames]
+    # フレーム画像のリサイズ
+    frames_resized = [cv2.resize(f, (clip_w, clip_h)) for f in frames_cliped]
+    # 映像書き出し
+    write_video(output_video, frames_resized, fps, clip_w, clip_h)
+
 
 
 def get_video(input_video, output_video, bboxes):
@@ -122,6 +138,8 @@ def get_video(input_video, output_video, bboxes):
     _, _, max_x, max_y, _ = bboxes.max(axis=0)
     person_w, person_h = int(max_x - min_x), int(max_y - min_y)
     cx, cy = int((max_x + min_x) / 2), int((max_y + min_y) / 2)
+
+    print(min_x, min_y, max_x, max_y)
 
     # 切り抜く領域を決める
     if person_w >= person_h:
@@ -136,7 +154,7 @@ def get_video(input_video, output_video, bboxes):
         get_video_small_area(input_video, output_video, cx, cy, clip_w, clip_h)
     # 人物領域の短辺が 256 pixel より長いの場合 -> get_video_big_area
     else:
-        get_video_big_area(input_video, output_video, cx, cy, person_w, person_h,)
+        get_video_big_area(input_video, output_video, cx, cy, person_w, person_h, clip_w, clip_h)
 
 
 def detect_video(net, meta, video):
@@ -162,6 +180,7 @@ def detect_video(net, meta, video):
             # トラッキング
             dets = np.array(dets) if dets != [] else np.empty((0, 5))
             dets_track = sort_tracker.update(dets)
+            # print(dets, "\n")
             # 検出された人物領域を整理
             for d in dets_track:
                 if int(d[4]) in person_id_dict:
@@ -170,11 +189,14 @@ def detect_video(net, meta, video):
                     person_id_dict[int(d[4])] = [d]
         else:
             break
-    
+    return
+
     # 人物領域の範囲
     cnt = 1
+    print(len(person_id_dict))
     for id in person_id_dict:
         track_array = np.array(person_id_dict[id])
+        # print(id, track_array[0:10])
         get_video(video, "test_{}.mp4".format(cnt), track_array)
         cnt += 1
 
@@ -183,5 +205,7 @@ if __name__ == "__main__":
     net = load_network()
     meta = load_meta_file()
     # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics600/video/train/walking_the_dog/0sL5rRoMgLs_000015_000025.mp4"
-    video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics600/video/train/dancing_ballet/3GewP3XbJHE_000050_000060.mp4"
+    # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics600/video/train/dancing_ballet/3GewP3XbJHE_000050_000060.mp4"
+    video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics700/video/val/geocaching/_qJxV4JtSmA.mp4"
+    # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video/shot3_1001.mp4"
     detect_video(net, meta, video)

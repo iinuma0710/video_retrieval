@@ -313,7 +313,7 @@ netMain = None
 metaMain = None
 altNames = None
 
-def performDetect(imagePath="../imgs/test30.jpg", thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath = "./weights/yolov4.weights", metaPath= "./cfg/coco.data", showImage= True, makeImageOnly = False, initOnly= False):
+def performDetect(imagePath="dog.jpg", thresh= 0.25, configPath = "./cfg/yolov4.cfg", weightPath = "./weights/yolov4.weights", metaPath= "./cfg/coco.data", showImage= True, makeImageOnly = False, initOnly= False):
     """
     Convenience function to handle the detection and returns of objects.
 

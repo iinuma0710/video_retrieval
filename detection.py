@@ -28,7 +28,7 @@ def load_meta_file(meta_file = "./darknet/cfg/coco.data"):
 
 
 # 各フレーム画像からの検出
-def detect_image(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
+def detect_image(net, meta, im, original_shape, thresh=.5, hier_thresh=.5, nms=.45):
     num = c_int(0)
     pnum = pointer(num)
     predict_image(net, im)
@@ -45,11 +45,14 @@ def detect_image(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
                 b = dets[j].bbox
                 nameTag = meta.names[i]
                 if nameTag == b'person':
-                    print(b.x, b.y, b.w, b.h)
-                    x1 = b.x - b.w / 2
-                    y1 = b.y - b.h / 2
-                    x2 = b.x + b.w / 2
-                    y2 = b.y + b.h / 2
+                    cx = b.x * original_shape[1] / im.w
+                    cy = b.y * original_shape[0] / im.h
+                    w = b.w * original_shape[1] / im.w
+                    h = b.h * original_shape[0] / im.h
+                    x1 = cx - w / 2
+                    y1 = cy - h / 2
+                    x2 = cx + w / 2
+                    y2 = cy + h / 2
                     res.append([x1, y1, x2, y2, dets[j].prob[i]])
     free_detections(dets, num)
     
@@ -176,11 +179,10 @@ def detect_video(net, meta, video):
             frame_resized = cv2.resize(frame_rgb, (network_width(net), network_height(net)), interpolation=cv2.INTER_LINEAR)
             copy_image_from_bytes(darknet_image, frame_resized.tobytes())
             # 検出
-            dets = detect_image(net, meta, darknet_image, thresh=0.25)
+            dets = detect_image(net, meta, darknet_image, frame.shape, thresh=0.25)
             # トラッキング
             dets = np.array(dets) if dets != [] else np.empty((0, 5))
             dets_track = sort_tracker.update(dets)
-            # print(dets, "\n")
             # 検出された人物領域を整理
             for d in dets_track:
                 if int(d[4]) in person_id_dict:
@@ -189,14 +191,11 @@ def detect_video(net, meta, video):
                     person_id_dict[int(d[4])] = [d]
         else:
             break
-    return
 
     # 人物領域の範囲
     cnt = 1
-    print(len(person_id_dict))
     for id in person_id_dict:
         track_array = np.array(person_id_dict[id])
-        # print(id, track_array[0:10])
         get_video(video, "test_{}.mp4".format(cnt), track_array)
         cnt += 1
 

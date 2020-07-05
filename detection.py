@@ -212,7 +212,7 @@ if __name__ == "__main__":
     net = load_network()
     meta = load_meta_file()
     # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics600/video/train/walking_the_dog/0sL5rRoMgLs_000015_000025.mp4"
-    video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics600/video/train/dancing_ballet/3GewP3XbJHE_000050_000060.mp4"
+    # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics600/video/train/dancing_ballet/3GewP3XbJHE_000050_000060.mp4"
     # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics700/video/val/geocaching/_qJxV4JtSmA.mp4"
-    # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video/shot3_1001.mp4"
+    video = "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video/shot3_1001.mp4"
     detect_video(net, meta, video)

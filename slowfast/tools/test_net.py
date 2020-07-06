@@ -81,13 +81,27 @@ def perform_test(test_loader, model, test_meter, cfg):
             test_meter.log_iter_stats(None, cur_iter)
         else:
             # Perform the forward pass.
-            preds = model(inputs)
+            preds, fv = model(inputs)
 
             # Gather all the predictions across all the devices to perform ensemble.
             if cfg.NUM_GPUS > 1:
                 preds, labels, video_idx = du.all_gather(
                     [preds, labels, video_idx]
                 )
+
+            # 抽出した特徴ベクトルを保存
+            if cfg.TEST.EXTRACT_FEATURES:
+                if cur_iter == 0:
+                    fvs = fv.detach().cpu()
+                    lbs = labels.detach().cpu()
+                    vis = video_idx.detach().cpu()
+                else:
+                    fvs = torch.cat((fvs, fv.detach().cpu()), dim=0)
+                    lbs = torch.cat((lbs, labels.detach().cpu()), dim=0)
+                    vis = torch.cat((vis, video_idx.detach().cpu()), dim=0)
+
+                print(fvs.shape, lbs.shape)
+                continue
 
             test_meter.iter_toc()
             # Update and log stats.
@@ -100,9 +114,16 @@ def perform_test(test_loader, model, test_meter, cfg):
 
         test_meter.iter_tic()
 
-    # Log epoch stats and print the final testing results.
-    test_meter.finalize_metrics()
-    test_meter.reset()
+    if cfg.TEST.EXTRACT_FEATURES:
+        # 抽出した特徴ベクトルとラベルのデータを保存
+        features = fvs.numpy()
+        np.save(cfg.FEATURES_FILE, features)
+        idx_labels = torch.cat((vis.reshape(len(vis), -1), lbs.reshape(len(lbs), -1)), dim=1).numpy()
+        np.save(cfg.LABELS_FILE, idx_labels)
+    else:
+        # Log epoch stats and print the final testing results.
+        test_meter.finalize_metrics()
+        test_meter.reset()
 
 
 def test(cfg):

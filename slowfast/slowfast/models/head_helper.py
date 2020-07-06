@@ -206,6 +206,10 @@ class ResNetBasicHead(nn.Module):
         x = torch.cat(pool_out, 1)
         # (N, C, T, H, W) -> (N, T, H, W, C).
         x = x.permute((0, 2, 3, 4, 1))
+
+        # 特徴ベクトルの抽出
+        fv = x.mean([1, 2, 3])
+
         # Perform dropout.
         if hasattr(self, "dropout"):
             x = self.dropout(x)
@@ -217,4 +221,4 @@ class ResNetBasicHead(nn.Module):
             x = x.mean([1, 2, 3])
 
         x = x.view(x.shape[0], -1)
-        return x
+        return x, fv

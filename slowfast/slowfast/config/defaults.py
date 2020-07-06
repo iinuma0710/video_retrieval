@@ -547,6 +547,22 @@ _C.TENSORBOARD.ENABLE = False
 _C.TENSORBOARD.LOG_DIR = ""
 
 
+# -----------------------------------------------------------------------------
+# 追加の設定項目
+# -----------------------------------------------------------------------------
+# train / val / test ファイルの一覧
+_C.DATA.PATH_TO_TRAIN_FILE = ""
+_C.DATA.PATH_TO_VAL_FILE = ""
+_C.DATA.PATH_TO_TEST_FILE = ""
+
+# 抽出した特徴量の保存先
+_C.FEATURES_FILE = "features"
+_C.LABELS_FILE = "labels"
+
+# テスト時に特徴抽出するかどうか
+_C.TEST.EXTRACT_FEATURES = False
+
+
 # Add custom config with default values.
 custom_config.add_custom_config(_C)
 

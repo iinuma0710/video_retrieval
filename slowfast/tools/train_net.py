@@ -70,7 +70,7 @@ def train_epoch(
 
         else:
             # Perform the forward pass.
-            preds = model(inputs)
+            preds, fv = model(inputs)
         # Explicitly declare reduction to mean.
         loss_fun = losses.get_loss_func(cfg.MODEL.LOSS_FUNC)(reduction="mean")
 
@@ -205,7 +205,7 @@ def eval_epoch(val_loader, model, val_meter, cur_epoch, cfg, writer=None):
             val_meter.update_stats(preds.cpu(), ori_boxes.cpu(), metadata.cpu())
 
         else:
-            preds = model(inputs)
+            preds, fv = model(inputs)
 
             if cfg.DATA.MULTI_LABEL:
                 if cfg.NUM_GPUS > 1:

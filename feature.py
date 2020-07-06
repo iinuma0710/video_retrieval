@@ -27,12 +27,12 @@ def extract_features(
     """
     1. Config ファイルのセットアップ
     """
-    # Setup cfg.
+    # config ファイルを取得
     cfg = get_cfg()
-    # Load config from cfg.
+    # 指定したファイルから設定を読み込む
     if cfg_file is not None:
         cfg.merge_from_file(cfg_file)
-    # Load config from command line, overwrite config from opts.
+    # opts で渡される設定内容で上書きする
     if opts is not None:
         cfg.merge_from_list(opts)
     # Inherit parameters from args.
@@ -72,14 +72,13 @@ if __name__ == "__main__":
     logger = logging.get_logger(__name__)
     torch.multiprocessing.set_start_method("forkserver")
     
-    # os.chdir("/home/iinuma/per610a/retrieval/")
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     opts = [
         "TRAIN.ENABLE", False,
         "TEST.ENABLE", True,
-        "DATA.PATH_TO_TEST_FILE", "data/kinetics600_resized/test_100.csv",
-        "TEST.NUM_ENSEMBLE_VIEWS", 1,
-        "TEST.NUM_SPATIAL_CROPS", 1,
+        "DATA.PATH_TO_TEST_FILE", "data/test_extract_feature.csv",
+        "TEST.NUM_ENSEMBLE_VIEWS", 8,
+        "TEST.NUM_SPATIAL_CROPS", 3,
         "TEST.BATCH_SIZE", 8,
         "TEST.EXTRACT_FEATURES", True,
         "TEST.CHECKPOINT_FILE_PATH", "slowfast/checkpoints/kinetics_100.pyth",

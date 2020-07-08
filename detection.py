@@ -1,219 +1,274 @@
-"""
-Darknet (YOLO v4) による人物領域の検出を行う
-    入力：映像のフレーム列 (バッチ処理)
-    出力：人物領域のバウンディングボックス
-
-Darknet の詳細は https://github.com/AlexeyAB/darknet を参照
-学習済みモデルは https://drive.google.com/open?id=1cewMfusmPjYWbrnuJRuKhPMwRe_b9PaT からダウンロード
-"""
-
+import os
+import sys
 import cv2
-import pprint
+import csv
+import glob
 import numpy as np
+
 from darknet import *
 from sort.sort import *
 
 
-# ネットワークの読み込み
-def load_network(config_file = "./darknet/cfg/yolov4.cfg", weight_file = "./darknet/weights/yolov4.weights"):
-    print("Loading network ... \n (weight : {}, config : {})".format(weight_file, config_file))
-    net = load_net_custom(config_file.encode("ascii"), weight_file.encode("ascii"), 0, 1)
-    return net
+class HumanDetectionAndTracking(object):
+    """
+    動作認識の前処理として人物領域の検出と追跡を行う．
 
-# メタデータの読み込み
-def load_meta_file(meta_file = "./darknet/cfg/coco.data"):
-    print("Loading meta data ... \n (meta_file : {})".format(meta_file))
-    meta = load_meta(meta_file.encode("ascii"))
-    return meta
+    処理の流れ：
+        1. Darknet (YOLO v4) による人物領域の検出を映像の各フレームに行う
+        2. 1 で検出された人物を SORT で追跡する
+        3. 検出・追跡された人物領域ごとに動画に書き出す
 
+    TO DO：
+        torch.Tensor の形式で動画を返せるようにする
+    """
 
-# 各フレーム画像からの検出
-def detect_image(net, meta, im, original_shape, thresh=.5, hier_thresh=.5, nms=.45):
-    num = c_int(0)
-    pnum = pointer(num)
-    predict_image(net, im)
-    letter_box = 0
-    dets = get_network_boxes(net, im.w, im.h, thresh, hier_thresh, None, 0, pnum, letter_box)
-    num = pnum[0]
-    if nms:
-        do_nms_sort(dets, num, meta.classes, nms)
-    
-    res = []
-    for j in range(num):
-        for i in range(meta.classes):
-            if dets[j].prob[i] > 0:
-                b = dets[j].bbox
-                nameTag = meta.names[i]
-                if nameTag == b'person':
-                    cx = b.x * original_shape[1] / im.w
-                    cy = b.y * original_shape[0] / im.h
-                    w = b.w * original_shape[1] / im.w
-                    h = b.h * original_shape[0] / im.h
-                    x1 = cx - w / 2
-                    y1 = cy - h / 2
-                    x2 = cx + w / 2
-                    y2 = cy + h / 2
-                    res.append([x1, y1, x2, y2, dets[j].prob[i]])
-    free_detections(dets, num)
-    
-    return res
+    def __init__(
+        self,
+        input,  # 処理前の映像を格納したディレクトリ or ファイル
+        output_dir, # 処理済みの映像を格納するディレクトリ
+        config_file="./darknet/cfg/yolov4.cfg",
+        weight_file="./darknet/weights/yolov4.weights",
+        meta_file = "./darknet/cfg/coco.data",
+        thresh=0.5,
+        hier_thresh=0.5,
+        nms=0.45
+    ):
+        self.output_dir = output_dir
+        self.config_file = config_file
+        self.weight_file = weight_file
+        self.meta_file = meta_file
+        self.thresh = thresh
+        self.hier_thresh = hier_thresh
+        self.nms = nms
 
-
-def read_video(video, frame_indexes):
-    # 映像ファイルの読み込み
-    cap = cv2.VideoCapture(video)
-    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_num = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    frames = []
-    while True:
-        ret, frame = cap.read()
-        if ret:
-            frames.append(frame)
+        # 処理する映像のリストアップ
+        if os.path.isfile(input):
+            self.videos = [input]
+        elif os.path.isdir(input):
+            self.videos = glob.glob(os.path.join(input, "*.mp4"))
         else:
-            break
+            print("No such file or directory : ". input)
+            sys.exit()
 
-    using_frames = [frames[i] for i in frame_indexes]
+        # ネットワークの読み込み
+        self.net = self._load_network()
+        # メタファイルの読み込み
+        self.meta = self._load_meta_file()
+        # 入力画像の雛形を作成
+        self.darknet_image = make_image(network_width(self.net), network_height(self.net), 3)
 
-    return h, w, frame_num, fps, using_frames
+        # 出力先のディレクトリがなければ作成
+        if not os.path.exists(self.output_dir):
+            os.mkdir(self.output_dir)
 
+        # その他プライベート変数の初期化
+        self.h, self.w, self.frame_num = [0] * 3
+        self.fps = 0.0
+        self.frames = []
+        self.output_file = ""
 
-def write_video(video, frames, fps, w, h):
-    fourcc = cv2.VideoWriter_fourcc('m','p','4', 'v')
-    mv = cv2.VideoWriter(video, fourcc, fps, (w, h))
-    for f in frames:
-        mv.write(f)
-    mv.release()
-
-
-def get_video_small_area(input_video, output_video, cx, cy, clip_w, clip_h, frame_indexes):
-    original_h, original_w, frame_num, fps, frames = read_video(input_video, frame_indexes)
-
-    # 幅の調整
-    if cx + clip_w / 2 > original_w:
-        min_x = int(max(0, original_w - clip_w))
-        max_x = int(original_w)
-    elif cx - clip_w / 2 < 0:
-        min_x = 0
-        max_x = int(min(original_w, clip_w))
-    else:
-        min_x = int(cx - clip_w / 2)
-        max_x = int(cx + clip_w / 2)
-    # 高さの調整
-    if cy + clip_h / 2 > original_h:
-        min_y = int(max(0, original_h - clip_h))
-        max_y = int(original_h)
-    elif cy - clip_h / 2 < 0:
-        min_y = 0
-        max_y = int(min(original_h, clip_h))
-    else:
-        min_y = int(cy - clip_h / 2)
-        max_y = int(cy + clip_h / 2)
-
-    print("small area (min_x, min_y, max_x, max_y) : ", (min_x, min_y, max_x, max_y))
-
-    # 画像をリサイズして映像に書き出す
-    frames_resized = [f[min_y:max_y, min_x:max_x] for f in frames]
-    write_video(output_video, frames_resized, fps, max_x - min_x, max_y - min_y)
+    
+    # ネットワークの読み込み
+    def _load_network(self):
+        print("Loading network ... \n (weight : {}, config : {})".format(self.weight_file, self.config_file))
+        net = load_net_custom(self.config_file.encode("ascii"), self.weight_file.encode("ascii"), 0, 1)
+        return net
 
 
-def get_video_big_area(input_video, output_video, cx, cy, person_w, person_h, clip_w, clip_h, frame_indexes):
-    original_h, original_w, frame_num, fps, frames = read_video(input_video, frame_indexes)
-
-    # 切り出し範囲の計算
-    min_x = int(max(0, cx - person_w / 2))
-    max_x = int(min(original_w, cx + person_w / 2))
-    min_y = int(max(0, cy - person_h / 2))
-    max_y = int(min(original_h, cy + person_h / 2))
-    print("big area (min_x, min_y, max_x, max_y) : ", (min_x, min_y, max_x, max_y))
-
-    # フレーム画像の切り出し
-    frames_cliped = [f[min_y:max_y, min_x:max_x] for f in frames]
-    # フレーム画像のリサイズ
-    frames_resized = [cv2.resize(f, (clip_w, clip_h)) for f in frames_cliped]
-    # 映像書き出し
-    write_video(output_video, frames_resized, fps, clip_w, clip_h)
+    # メタファイルの読み込み
+    def _load_meta_file(self):
+        print("Loading meta data ... \n (meta_file : {})".format(self.meta_file))
+        meta = load_meta(self.meta_file.encode("ascii"))
+        return meta
 
 
+    # 映像の読み込み
+    def _read_video(self, video):
+        cap = cv2.VideoCapture(video)
+        self.h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.frame_num = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        self.frames = []
+        while True:
+            ret, frame = cap.read()
+            if ret:
+                self.frames.append(frame)
+            else:
+                break
 
-def get_video(input_video, output_video, bboxes, frame_indexes):
-    # 人物の最大範囲を求める
-    min_x, min_y, _, _, _ = bboxes.min(axis=0)
-    _, _, max_x, max_y, _ = bboxes.max(axis=0)
-    person_w, person_h = int(max_x - min_x), int(max_y - min_y)
-    cx, cy = int((max_x + min_x) / 2), int((max_y + min_y) / 2)
-
-    # print(min_x, min_y, max_x, max_y)
-
-    # 切り抜く領域を決める
-    if person_w >= person_h:
-        clip_w = int(person_w * 256 / person_h)
-        clip_h = 256
-    else:
-        clip_h = int(person_h * 256 / person_w)
-        clip_w = 256
-
-    # 人物領域の短辺が 256 pixel 以下の場合 -> get_video_small_area
-    if min(person_w, person_h) <= 256:
-        get_video_small_area(input_video, output_video, cx, cy, clip_w, clip_h, frame_indexes)
-    # 人物領域の短辺が 256 pixel より長いの場合 -> get_video_big_area
-    else:
-        get_video_big_area(input_video, output_video, cx, cy, person_w, person_h, clip_w, clip_h, frame_indexes)
+    
+    # 映像の書き出し
+    def _write_video(self, frames, w, h):
+        fourcc = cv2.VideoWriter_fourcc('m','p','4', 'v')
+        mv = cv2.VideoWriter(self.output_file, fourcc, self.fps, (w, h))
+        for f in frames:
+            mv.write(f)
+        mv.release()
 
 
-def detect_video(net, meta, video):
-    # 映像ファイルの読み込み
-    cap = cv2.VideoCapture(video)
-    # 入力画像の雛形
-    darknet_image = make_image(network_width(net), network_height(net), 3)
-    # SORT によるトラッキングの初期化
-    sort_tracker = Sort()
-
-    frame_idx = 0
-    frame_idx_dict = {}
-    person_id_dict = {}
-    while True:
-        # フレーム画像のキャプチャ
-        ret, frame = cap.read()
-        if ret:
-            # フレーム画像の前処理
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame_resized = cv2.resize(frame_rgb, (network_width(net), network_height(net)), interpolation=cv2.INTER_LINEAR)
-            copy_image_from_bytes(darknet_image, frame_resized.tobytes())
-            # 検出
-            dets = detect_image(net, meta, darknet_image, frame.shape, thresh=0.25)
-            # トラッキング
-            dets = np.array(dets) if dets != [] else np.empty((0, 5))
-            dets_track = sort_tracker.update(dets)
-            # 検出された人物領域を整理
-            for d in dets_track:
-                if int(d[4]) in person_id_dict:
-                    person_id_dict[int(d[4])].append(d)
-                    frame_idx_dict[int(d[4])].append(frame_idx)
-                else:
-                    person_id_dict[int(d[4])] = [d]
-                    frame_idx_dict[int(d[4])] = [frame_idx]
-            frame_idx += 1
+    def _get_video_small_area(self, cx, cy, clip_w, clip_h, frame_indexes):
+        # 幅の調整
+        if cx + clip_w / 2 > self.w:
+            min_x = int(max(0, self.w - clip_w))
+            max_x = int(self.w)
+        elif cx - clip_w / 2 < 0:
+            min_x = 0
+            max_x = int(min(self.w, clip_w))
         else:
-            break
+            min_x = int(cx - clip_w / 2)
+            max_x = int(cx + clip_w / 2)
+        # 高さの調整
+        if cy + clip_h / 2 > self.h:
+            min_y = int(max(0, self.h - clip_h))
+            max_y = int(original_h)
+        elif cy - clip_h / 2 < 0:
+            min_y = 0
+            max_y = int(min(self.h, clip_h))
+        else:
+            min_y = int(cy - clip_h / 2)
+            max_y = int(cy + clip_h / 2)
 
-    # 人物領域ごとに動画に書き出す
-    for id in person_id_dict:
-        # 短すぎる場合は飛ばす
-        if len(frame_idx_dict[id]) < 32:
-            continue
+        print("small area (min_x, min_y, max_x, max_y) : ", (min_x, min_y, max_x, max_y))
 
-        track_array = np.array(person_id_dict[id])
-        get_video(video, "test_id_{}.mp4".format(id), track_array, frame_idx_dict[id])
+        # 画像をリサイズして映像に書き出す
+        frames_resized = [f[min_y:max_y, min_x:max_x] for f in self.frames]
+        frames_resized = [frames_resized[i] for i in frame_indexes]
+        self._write_video(frames_resized, max_x - min_x, max_y - min_y)
+
+
+    def _get_video_big_area(self, cx, cy, person_w, person_h, clip_w, clip_h, frame_indexes):
+        # 切り出し範囲の計算
+        min_x = int(max(0, cx - person_w / 2))
+        max_x = int(min(self.w, cx + person_w / 2))
+        min_y = int(max(0, cy - person_h / 2))
+        max_y = int(min(self.h, cy + person_h / 2))
+        print("big area (min_x, min_y, max_x, max_y) : ", (min_x, min_y, max_x, max_y))
+
+        # フレーム画像の切り出し
+        frames_cliped = [f[min_y:max_y, min_x:max_x] for f in self.frames]
+        frames_resized = [cv2.resize(f, (clip_w, clip_h)) for f in frames_cliped]
+        frames_resized = [frames_resized[i] for i in frame_indexes]
+        self._write_video(frames_resized, clip_w, clip_h)
+
+
+    def get_video(self, bboxes, frame_indexes):
+        # 人物の最大範囲を求める
+        min_x, min_y, _, _, _ = bboxes.min(axis=0)
+        _, _, max_x, max_y, _ = bboxes.max(axis=0)
+        person_w, person_h = int(max_x - min_x), int(max_y - min_y)
+        cx, cy = int((max_x + min_x) / 2), int((max_y + min_y) / 2)
+
+        # 切り抜く領域を決める
+        if person_w >= person_h:
+            clip_w = int(person_w * 256 / person_h)
+            clip_h = 256
+        else:
+            clip_h = int(person_h * 256 / person_w)
+            clip_w = 256
+
+        # 人物領域の短辺が 256 pixel 以下の場合 -> get_video_small_area
+        if min(person_w, person_h) <= 256:
+            self._get_video_small_area(cx, cy, clip_w, clip_h, frame_indexes)
+        # 人物領域の短辺が 256 pixel より長いの場合 -> get_video_big_area
+        else:
+            self._get_video_big_area(cx, cy, person_w, person_h, clip_w, clip_h, frame_indexes)
+
+
+    # フレーム画像から人物領域を検出する
+    def _detect_human(self, frame):
+        # フレーム画像の前処理
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame_resized = cv2.resize(frame_rgb, (network_width(self.net), network_height(self.net)), interpolation=cv2.INTER_LINEAR)
+        copy_image_from_bytes(self.darknet_image, frame_resized.tobytes())
+
+        # 物体検出
+        num = c_int(0)
+        pnum = pointer(num)
+        predict_image(self.net, self.darknet_image)
+        letter_box = 0
+        dets = get_network_boxes(self.net, self.darknet_image.w, self.darknet_image.h, self.thresh, self.hier_thresh, None, 0, pnum, letter_box)
+        num = pnum[0]
+        if self.nms:
+            do_nms_sort(dets, num, self.meta.classes, self.nms)
+    
+        # 人物領域だけを取り出し，スケールを変換する
+        res = []
+        for j in range(num):
+            for i in range(self.meta.classes):
+                if dets[j].prob[i] > 0:
+                    b = dets[j].bbox
+                    nameTag = self.meta.names[i]
+                    if nameTag == b'person':
+                        # もとの画像スケールに戻す
+                        cx = b.x * self.w / self.darknet_image.w
+                        cy = b.y * self.h / self.darknet_image.h
+                        w = b.w * self.w / self.darknet_image.w
+                        h = b.h * self.h / self.darknet_image.h
+                        # 左上と右下の座標に変換
+                        x1 = cx - w / 2
+                        y1 = cy - h / 2
+                        x2 = cx + w / 2
+                        y2 = cy + h / 2
+                        res.append([x1, y1, x2, y2, dets[j].prob[i]])
+        free_detections(dets, num)
+    
+        return res
+
+
+    # 各映像について人物の検出とトラッキングを行う
+    def detect_and_track_human(self):
+        videos_list = []
+        # for ループで各映像を処理
+        for video in self.videos:
+            # 映像の読み出し
+            self._read_video(video)
+            # SORT の初期化
+            sort_tracker = Sort()
+
+            # フレームごとに人物領域を検出し逐次的にトラッキング
+            frame_idx = 0
+            frame_idx_dict = {}
+            human_id_dict = {}
+            for frame in self.frames:
+                # 検出
+                dets = self._detect_human(frame)
+                # トラッキング
+                dets = np.array(dets) if dets != [] else np.empty((0, 5))
+                dets_track = sort_tracker.update(dets)
+                # 検出された人物領域を整理
+                for d in dets_track:
+                    if int(d[4]) in human_id_dict:
+                        human_id_dict[int(d[4])].append(d)
+                        frame_idx_dict[int(d[4])].append(frame_idx)
+                    else:
+                        human_id_dict[int(d[4])] = [d]
+                        frame_idx_dict[int(d[4])] = [frame_idx]
+                frame_idx += 1
+                
+            # 動画に書き出す
+            for id in human_id_dict:
+                # 短すぎる場合には飛ばす
+                if len(frame_idx_dict[id]) < 32:
+                    continue
+
+                # 出力ファイル名を決める
+                base_name = os.path.splitext(os.path.basename(video))[0]
+                self.output_file = os.path.join(self.output_dir, base_name + "_id_{}.mp4".format(id))
+                # 書き出し
+                track_array = np.array(human_id_dict[id])
+                self.get_video(track_array, frame_idx_dict[id])
+
+                videos_list.append([self.output_file, len(frame_idx_dict[id])])
+        
+        with open(os.path.join(self.output_dir, "videos.csv"), "w") as fp:
+            writer = csv.writer(fp, delimiter=' ')
+            writer.writerows(videos_list)
 
 
 if __name__ == "__main__":
-    net = load_network()
-    meta = load_meta_file()
-    # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics600/video/train/walking_the_dog/0sL5rRoMgLs_000015_000025.mp4"
-    # video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics600/video/train/dancing_ballet/3GewP3XbJHE_000050_000060.mp4"
-    video = "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics700/video/val/geocaching/_qJxV4JtSmA.mp4"
-    detect_video(net, meta, video)
-    video = "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video/shot3_1001.mp4"
-    detect_video(net, meta, video)
+    detector = HumanDetectionAndTracking(
+        "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video/",
+        "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/"
+    )
+    detector.detect_and_track_human()

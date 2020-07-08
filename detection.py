@@ -121,7 +121,7 @@ class HumanDetectionAndTracking(object):
         # 高さの調整
         if cy + clip_h / 2 > self.h:
             min_y = int(max(0, self.h - clip_h))
-            max_y = int(original_h)
+            max_y = int(self.h)
         elif cy - clip_h / 2 < 0:
             min_y = 0
             max_y = int(min(self.h, clip_h))

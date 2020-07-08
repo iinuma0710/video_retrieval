@@ -3,7 +3,7 @@ import cv2
 
 
 # 動画ファイルを開く
-video = cv2.VideoCapture('test_id_1.mp4')
+video = cv2.VideoCapture('data/out_video/3GewP3XbJHE_000050_000060_id_11.mp4')
 
 # PCに接続されたカメラの映像を表示
 # video = cv2.VideoCapture(0)

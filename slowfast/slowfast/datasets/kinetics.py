@@ -220,7 +220,7 @@ class Kinetics(torch.utils.data.Dataset):
                 backend=self.cfg.DATA.DECODING_BACKEND,
                 max_spatial_scale=max_scale,
             )
-
+            
             # If decoding failed (wrong format, video is too short, and etc),
             # select another video.
             if frames is None:

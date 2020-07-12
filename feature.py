@@ -72,14 +72,14 @@ if __name__ == "__main__":
     logger = logging.get_logger(__name__)
     torch.multiprocessing.set_start_method("forkserver")
     
-    os.environ["CUDA_VISIBLE_DEVICES"]="0"
+    os.environ["CUDA_VISIBLE_DEVICES"]="1"
     opts = [
         "TRAIN.ENABLE", False,
         "TEST.ENABLE", True,
         "DATA.PATH_TO_TEST_FILE", "data/test_extract_feature.csv",
-        "TEST.NUM_ENSEMBLE_VIEWS", 8,
+        "TEST.NUM_ENSEMBLE_VIEWS", 4,
         "TEST.NUM_SPATIAL_CROPS", 3,
-        "TEST.BATCH_SIZE", 8,
+        "TEST.BATCH_SIZE", 12,
         "TEST.EXTRACT_FEATURES", True,
         "TEST.CHECKPOINT_FILE_PATH", "slowfast/checkpoints/kinetics_100.pyth",
         "NUM_GPUS", 1,

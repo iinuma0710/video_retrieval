@@ -3,7 +3,7 @@ import cv2
 
 
 # 動画ファイルを開く
-video = cv2.VideoCapture('data/out_video/3GewP3XbJHE_000050_000060_id_11.mp4')
+video = cv2.VideoCapture('/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot0_24_id_2.mp4')
 
 # PCに接続されたカメラの映像を表示
 # video = cv2.VideoCapture(0)

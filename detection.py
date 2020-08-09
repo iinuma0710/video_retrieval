@@ -268,7 +268,9 @@ class HumanDetectionAndTracking(object):
 
 if __name__ == "__main__":
     detector = HumanDetectionAndTracking(
-        "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video/",
-        "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/"
+        # "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video/",
+        # "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/"
+        "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics700/video/val/geocaching/_qJxV4JtSmA.mp4",
+        "data/"
     )
     detector.detect_and_track_human()

@@ -82,13 +82,18 @@ def perform_test(test_loader, model, test_meter, cfg):
         else:
             # Perform the forward pass.
             preds, fv = model(inputs)
-
+            
             # Gather all the predictions across all the devices to perform ensemble.
             if cfg.NUM_GPUS > 1:
-                preds, labels, video_idx = du.all_gather(
-                    [preds, labels, video_idx]
-                )
-
+                if cfg.TEST.EXTRACT_FEATURES:
+                    fv, labels, video_idx = du.all_gather(
+                        [fv, labels, video_idx]
+                    )
+                else:    
+                    preds, labels, video_idx = du.all_gather(
+                        [preds, labels, video_idx]
+                    )
+            # print(labels, fv.shape)
             # 抽出した特徴ベクトルを保存
             if cfg.TEST.EXTRACT_FEATURES:
                 if cur_iter == 0:

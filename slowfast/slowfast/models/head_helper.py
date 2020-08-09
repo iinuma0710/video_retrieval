@@ -209,6 +209,8 @@ class ResNetBasicHead(nn.Module):
 
         # 特徴ベクトルの抽出
         fv = x.mean([1, 2, 3])
+        fv = fv.view(fv.shape[0], -1)
+        # print(x.shape, fv.shape)
 
         # Perform dropout.
         if hasattr(self, "dropout"):

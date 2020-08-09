@@ -71,19 +71,20 @@ def extract_features(
 if __name__ == "__main__":
     logger = logging.get_logger(__name__)
     torch.multiprocessing.set_start_method("forkserver")
-    
-    os.environ["CUDA_VISIBLE_DEVICES"]="1"
-    opts = [
-        "TRAIN.ENABLE", False,
-        "TEST.ENABLE", True,
-        "DATA.PATH_TO_TEST_FILE", "data/test_extract_feature.csv",
-        "TEST.NUM_ENSEMBLE_VIEWS", 4,
-        "TEST.NUM_SPATIAL_CROPS", 3,
-        "TEST.BATCH_SIZE", 12,
-        "TEST.EXTRACT_FEATURES", True,
-        "TEST.CHECKPOINT_FILE_PATH", "slowfast/checkpoints/kinetics_100.pyth",
-        "NUM_GPUS", 1,
-        "FEATURES_FILE", "features/kinetics_100",
-        "LABELS_FILE", "features/kinetics_100_labels"
-    ]
-    extract_features("slowfast/configs/Kinetics/SLOWFAST_8x8_R50.yaml", opts=opts)
+    os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3,4,5,6,7"
+    for i in range(12):
+        opts = [
+            "TRAIN.ENABLE", False,
+            "TEST.ENABLE", True,
+            "DATA.PATH_TO_TEST_FILE", "data/eastenders/video_list_64/list_{}.csv".format(i),
+            "DATA.SAMPLING_RATE", 8, # 32~64 frames -> 4, 65 frames ~ -> 8
+            "TEST.NUM_ENSEMBLE_VIEWS", 4,
+            "TEST.NUM_SPATIAL_CROPS", 3,
+            "TEST.BATCH_SIZE", 12,
+            "TEST.EXTRACT_FEATURES", True,
+            "TEST.CHECKPOINT_FILE_PATH", "slowfast/checkpoints/SLOWFAST_8x8_R50_KINETICS600.pyth",
+            "NUM_GPUS", 8,
+            "FEATURES_FILE", "data/eastenders/feature_label_64/feature_{}".format(i),
+            "LABELS_FILE", "data/eastenders/feature_label_64/label_{}".format(i)
+        ]
+        extract_features("slowfast/configs/Kinetics/SLOWFAST_8x8_R50.yaml", opts=opts)

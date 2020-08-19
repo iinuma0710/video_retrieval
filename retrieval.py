@@ -1,6 +1,7 @@
 import os
 import csv
 import numpy as np
+import argparse
 
 
 def load_data(csv_file):
@@ -67,6 +68,21 @@ if __name__ == "__main__":
     action_features = np.load("data/eastenders/action_features.npy")
     feature_idx_dict, action_label_dict = load_data("data/eastenders/features.csv")
 
-    rank = retrieval(98, action_features)
-    ap = calc_ap(98, rank, feature_idx_dict)
-    print(ap)
+    cnt = 0
+    label_ap_sum = 0.0
+    for action_label in action_label_dict:
+        label_ap = 0.0
+        for idx in action_label_dict[action_label]:
+            rank = retrieval(idx, action_features)
+            ap = calc_ap(idx, rank, feature_idx_dict)
+            label_ap += ap / len(action_label_dict[action_label])
+            print("query_idx: {}, action_label: {}, AP={}".format(idx, action_label, ap))
+        label_ap_sum += label_ap
+        cnt += 1
+        print("action_label: {}, AP={}".format(action_label, label_ap))
+    mean_ap = label_ap_sum / cnt
+    print("mAP: ", mean_ap) 
+
+    # rank = retrieval(98, action_features)
+    # ap = calc_ap(98, rank, feature_idx_dict)
+    # print(ap)

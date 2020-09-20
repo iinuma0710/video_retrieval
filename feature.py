@@ -1,5 +1,6 @@
 import os
 import sys
+import csv
 import torch
 import numpy as np
 
@@ -68,23 +69,32 @@ def extract_features(
         test(cfg=cfg)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
+    with open("/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/trecvid_2019/query/person_videos.csv", "r") as f:
+        reader = csv.reader(f, delimiter=" ")
+        video_list = [[row[2], row[0]] for row in reader]
+    
+    with open("tmp.csv", "w") as f:
+        writer = csv.writer(f, delimiter=" ")
+        writer.writerows(video_list)
+
     logger = logging.get_logger(__name__)
     torch.multiprocessing.set_start_method("forkserver")
     os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3,4,5,6,7"
-    for i in range(12):
-        opts = [
-            "TRAIN.ENABLE", False,
-            "TEST.ENABLE", True,
-            "DATA.PATH_TO_TEST_FILE", "data/eastenders/video_list_64/list_{}.csv".format(i),
-            "DATA.SAMPLING_RATE", 8, # 32~64 frames -> 4, 65 frames ~ -> 8
-            "TEST.NUM_ENSEMBLE_VIEWS", 4,
-            "TEST.NUM_SPATIAL_CROPS", 3,
-            "TEST.BATCH_SIZE", 12,
-            "TEST.EXTRACT_FEATURES", True,
-            "TEST.CHECKPOINT_FILE_PATH", "slowfast/checkpoints/SLOWFAST_8x8_R50_KINETICS600.pyth",
-            "NUM_GPUS", 8,
-            "FEATURES_FILE", "data/eastenders/feature_label_64/feature_{}".format(i),
-            "LABELS_FILE", "data/eastenders/feature_label_64/label_{}".format(i)
-        ]
-        extract_features("slowfast/configs/Kinetics/SLOWFAST_8x8_R50.yaml", opts=opts)
+    opts = [
+        "TRAIN.ENABLE", False,
+        "TEST.ENABLE", True,
+        "DATA.PATH_TO_TEST_FILE", "tmp.csv",
+        "DATA.SAMPLING_RATE", 8, # 32~64 frames -> 4, 65 frames ~ -> 8
+        "TEST.NUM_ENSEMBLE_VIEWS", 4,
+        "TEST.NUM_SPATIAL_CROPS", 3,
+        "TEST.BATCH_SIZE", 12,
+        "TEST.EXTRACT_FEATURES", True,
+        "TEST.CHECKPOINT_FILE_PATH", "slowfast/checkpoints/SLOWFAST_8x8_R50_KINETICS600.pyth",
+        "NUM_GPUS", 8,
+        "FEATURES_FILE", "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/trecvid_2019/query/feature.npy",
+        "LABELS_FILE", "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/trecvid_2019/query/label.npy"
+    ]
+    extract_features("slowfast/configs/Kinetics/SLOWFAST_8x8_R50.yaml", opts=opts)
+
+    os.remove("tmp.csv")

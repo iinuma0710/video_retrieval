@@ -3,6 +3,7 @@ import sys
 import cv2
 import csv
 import glob
+import argparse
 import numpy as np
 
 from darknet import *
@@ -24,7 +25,7 @@ class HumanDetectionAndTracking(object):
 
     def __init__(
         self,
-        input,  # 処理前の映像を格納したディレクトリ or ファイル
+        data_dir,   # 映像情報をまとめて管理するディレクトリ
         output_dir, # 処理済みの映像を格納するディレクトリ
         config_file="./darknet/cfg/yolov4.cfg",
         weight_file="./darknet/weights/yolov4.weights",
@@ -42,13 +43,9 @@ class HumanDetectionAndTracking(object):
         self.nms = nms
 
         # 処理する映像のリストアップ
-        if os.path.isfile(input):
-            self.videos = [input]
-        elif os.path.isdir(input):
-            self.videos = glob.glob(os.path.join(input, "*.mp4"))
-        else:
-            print("No such file or directory : ". input)
-            sys.exit()
+        with open(os.path.join(data_dir, "original_videos.csv"), "r") as f:
+            reader = csv.reader(f, delimiter=" ")
+            self.videos = [[int(row[0]), row[1]] for row in reader]
 
         # ネットワークの読み込み
         self.net = self._load_network()
@@ -219,8 +216,9 @@ class HumanDetectionAndTracking(object):
     # 各映像について人物の検出とトラッキングを行う
     def detect_and_track_human(self):
         videos_list = []
+        person_video_idx = 1
         # for ループで各映像を処理
-        for video in self.videos:
+        for original_idx, video in self.videos:
             # 映像の読み出し
             self._read_video(video)
             # SORT の初期化
@@ -249,7 +247,7 @@ class HumanDetectionAndTracking(object):
             # 動画に書き出す
             for id in human_id_dict:
                 # 短すぎる場合には飛ばす
-                if len(frame_idx_dict[id]) < 32:
+                if len(frame_idx_dict[id]) < 64:
                     continue
 
                 # 出力ファイル名を決める
@@ -259,18 +257,40 @@ class HumanDetectionAndTracking(object):
                 track_array = np.array(human_id_dict[id])
                 self.get_video(track_array, frame_idx_dict[id])
 
-                videos_list.append([self.output_file, len(frame_idx_dict[id])])
+                videos_list.append([person_video_idx, original_idx ,self.output_file, ""])
+                person_video_idx += 1
         
-        with open(os.path.join(self.output_dir, "videos.csv"), "w") as fp:
+        with open(os.path.join(self.output_dir, "person_videos.csv"), "w") as fp:
             writer = csv.writer(fp, delimiter=' ')
             writer.writerows(videos_list)
 
 
+# 引数の整理
+def parse_arg():
+    parser = argparse.ArgumentParser()
+
+    # 処理した映像を保存しておくファイル
+    parser.add_argument('--output_dir',
+                        type=str,
+                        required=True,
+                        help="Path to data directory"
+                       )
+    # 映像の情報をファイルで管理するためのディレクトリ
+    parser.add_argument('--data_dir',
+                        type=str,
+                        required=True,
+                        help="Path to the file saving result ranking"
+                       )
+    
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == "__main__":
+    args = parse_arg()
+
     detector = HumanDetectionAndTracking(
-        # "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video/",
-        # "/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/"
-        "/net/per610a/export/das18a/satoh-lab/share/datasets/kinetics700/video/val/geocaching/_qJxV4JtSmA.mp4",
-        "data/"
+        data_dir=args.data_dir,
+        output_dir=args.output_dir
     )
     detector.detect_and_track_human()

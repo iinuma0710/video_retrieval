@@ -66,3 +66,6 @@ jupyter/.ipynb_checkpoints/
 
 # pyth ファイル (モデルを保存したファイル)
 *.pyth
+
+# eastenders データセットディレクトリ
+eastenders/

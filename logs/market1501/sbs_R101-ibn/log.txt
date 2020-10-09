@@ -1294,3 +1294,313 @@ TEST:
   [34mheads.classifier.weight[0m
 [10/09 18:05:22] fastreid.utils.checkpoint INFO: The checkpoint contains parameters not used by the model:
   [35mheads.bnneck.{weight, bias, running_mean, running_var, num_batches_tracked}[0m
+[10/09 18:07:04] fastreid INFO: Rank of current process: 0. World size: 1
+[10/09 18:07:04] fastreid INFO: Environment info:
+----------------------  --------------------------------------------------------------------------------------------------------------------------------------------------
+sys.platform            linux
+Python                  3.7.3 (default, Mar 27 2019, 22:11:17) [GCC 7.3.0]
+numpy                   1.19.0
+fastreid                0.1.0 @./fast-reid/fastreid
+FASTREID_ENV_MODULE     <not set>
+PyTorch                 1.6.0+cu101 @/net/per610a/export/das18a/satoh-lab/iinuma/.pyenv/versions/anaconda3-2019.03/lib/python3.7/site-packages/torch
+PyTorch debug build     False
+GPU available           True
+GPU 0,1,2,3,4,5,6,7     Tesla V100-SXM2-16GB
+CUDA_HOME               /usr/local/cuda:/usr/local/cuda
+Pillow                  5.4.1
+torchvision             0.7.0+cu101 @/net/per610a/export/das18a/satoh-lab/iinuma/.pyenv/versions/anaconda3-2019.03/lib/python3.7/site-packages/torchvision
+torchvision arch flags  /net/per610a/export/das18a/satoh-lab/iinuma/.pyenv/versions/anaconda3-2019.03/lib/python3.7/site-packages/torchvision/_C.so; cannot find cuobjdump
+fvcore                  0.1.2
+cv2                     4.1.0
+----------------------  --------------------------------------------------------------------------------------------------------------------------------------------------
+PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2019.0.5 Product Build 20190808 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v1.5.0 (Git Hash e2ac1fac44c5078ca927cb9b90e1b3066a0b2ed0)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 10.1
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75
+  - CuDNN 7.6.3
+  - Magma 2.5.2
+  - Build settings: BLAS=MKL, BUILD_TYPE=Release, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DUSE_VULKAN_WRAPPER -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, USE_CUDA=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_STATIC_DISPATCH=OFF, 
+
+[10/09 18:07:04] fastreid INFO: Command line arguments: Namespace(config_file='./fast-reid/configs/person_reid.yml', dist_url='tcp://127.0.0.1:49573', eval_only=False, finetune=False, machine_rank=0, num_gpus=1, num_machines=1, opts=[], resume=False)
+[10/09 18:07:04] fastreid INFO: Contents of args.config_file=./fast-reid/configs/person_reid.yml:
+_BASE_: "Base-Strongerbaseline.yml"
+
+MODEL:
+  BACKBONE:
+    DEPTH: "101x"
+    WITH_IBN: True
+  WEIGHTS: "fast-reid/checkpoints/market_sbs_R101-ibn.pth"
+
+DATASETS:
+  NAMES: ("Market1501",)
+  TESTS: ("Market1501",)
+
+OUTPUT_DIR: "logs/market1501/sbs_R101-ibn"
+
+[10/09 18:07:04] fastreid INFO: Running with full config:
+CUDNN_BENCHMARK: True
+DATALOADER:
+  NAIVE_WAY: True
+  NUM_INSTANCE: 16
+  NUM_WORKERS: 8
+  PK_SAMPLER: True
+DATASETS:
+  COMBINEALL: False
+  NAMES: ('Market1501',)
+  TESTS: ('Market1501',)
+INPUT:
+  CJ:
+    BRIGHTNESS: 0.15
+    CONTRAST: 0.15
+    ENABLED: False
+    HUE: 0.1
+    PROB: 0.8
+    SATURATION: 0.1
+  DO_AUGMIX: False
+  DO_AUTOAUG: True
+  DO_FLIP: True
+  DO_PAD: True
+  FLIP_PROB: 0.5
+  PADDING: 10
+  PADDING_MODE: constant
+  REA:
+    ENABLED: True
+    MEAN: [123.675, 116.28, 103.53]
+    PROB: 0.5
+  RPT:
+    ENABLED: False
+    PROB: 0.5
+  SIZE_TEST: [384, 128]
+  SIZE_TRAIN: [384, 128]
+MODEL:
+  BACKBONE:
+    DEPTH: 101x
+    FEAT_DIM: 2048
+    LAST_STRIDE: 1
+    NAME: build_resnet_backbone
+    NORM: BN
+    PRETRAIN: True
+    PRETRAIN_PATH: /export/home/lxy/.cache/torch/checkpoints/resnet50-19c8e357.pth
+    WITH_IBN: True
+    WITH_NL: True
+    WITH_SE: False
+  DEVICE: cuda
+  FREEZE_LAYERS: ['backbone']
+  HEADS:
+    CLS_LAYER: circleSoftmax
+    EMBEDDING_DIM: 0
+    MARGIN: 0.35
+    NAME: EmbeddingHead
+    NECK_FEAT: after
+    NORM: BN
+    NUM_CLASSES: 0
+    POOL_LAYER: gempoolP
+    SCALE: 64
+    WITH_BNNECK: True
+  LOSSES:
+    CE:
+      ALPHA: 0.2
+      EPSILON: 0.1
+      SCALE: 1.0
+    CIRCLE:
+      ALPHA: 128
+      MARGIN: 0.25
+      SCALE: 1.0
+    FL:
+      ALPHA: 0.25
+      GAMMA: 2
+      SCALE: 1.0
+    NAME: ('CrossEntropyLoss', 'TripletLoss')
+    TRI:
+      HARD_MINING: True
+      MARGIN: 0.0
+      NORM_FEAT: False
+      SCALE: 1.0
+  META_ARCHITECTURE: Baseline
+  PIXEL_MEAN: [123.675, 116.28, 103.53]
+  PIXEL_STD: [58.395, 57.120000000000005, 57.375]
+  WEIGHTS: fast-reid/checkpoints/market_sbs_R101-ibn.pth
+OUTPUT_DIR: logs/market1501/sbs_R101-ibn
+SOLVER:
+  AMP_ENABLED: False
+  BASE_LR: 0.00035
+  BIAS_LR_FACTOR: 1.0
+  CHECKPOINT_PERIOD: 30
+  DELAY_ITERS: 30
+  ETA_MIN_LR: 7.7e-07
+  FREEZE_ITERS: 10
+  GAMMA: 0.1
+  HEADS_LR_FACTOR: 1.0
+  IMS_PER_BATCH: 64
+  MAX_ITER: 60
+  MOMENTUM: 0.9
+  OPT: Adam
+  SCHED: WarmupCosineAnnealingLR
+  STEPS: [40, 90]
+  SWA:
+    ENABLED: False
+    ETA_MIN_LR: 3.5e-06
+    ITER: 10
+    LR_FACTOR: 10.0
+    LR_SCHED: False
+    PERIOD: 2
+  WARMUP_FACTOR: 0.01
+  WARMUP_ITERS: 10
+  WARMUP_METHOD: linear
+  WEIGHT_DECAY: 0.0005
+  WEIGHT_DECAY_BIAS: 0.0005
+TEST:
+  AQE:
+    ALPHA: 3.0
+    ENABLED: False
+    QE_K: 5
+    QE_TIME: 1
+  EVAL_PERIOD: 30
+  IMS_PER_BATCH: 128
+  METRIC: cosine
+  PRECISE_BN:
+    DATASET: Market1501
+    ENABLED: False
+    NUM_ITER: 300
+  RERANK:
+    ENABLED: False
+    K1: 20
+    K2: 6
+    LAMBDA: 0.3
+  ROC_ENABLED: False
+[10/09 18:07:04] fastreid INFO: Full config saved to /net/per610a/export/das18a/satoh-lab/iinuma/video_retrieval/logs/market1501/sbs_R101-ibn/config.yaml
+[10/09 18:07:04] fastreid.utils.env INFO: Using a generated random seed 5054468
+[10/09 18:07:10] fastreid.utils.checkpoint INFO: Loading checkpoint from fast-reid/checkpoints/market_sbs_R101-ibn.pth
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.0.g.weight' has shape (1, 512, 1, 1) in the checkpoint but (256, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.0.g.bias' has shape (1,) in the checkpoint but (256,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.0.W.0.weight' has shape (512, 1, 1, 1) in the checkpoint but (512, 256, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.0.theta.weight' has shape (1, 512, 1, 1) in the checkpoint but (256, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.0.theta.bias' has shape (1,) in the checkpoint but (256,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.0.phi.weight' has shape (1, 512, 1, 1) in the checkpoint but (256, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.0.phi.bias' has shape (1,) in the checkpoint but (256,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.1.g.weight' has shape (1, 512, 1, 1) in the checkpoint but (256, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.1.g.bias' has shape (1,) in the checkpoint but (256,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.1.W.0.weight' has shape (512, 1, 1, 1) in the checkpoint but (512, 256, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.1.theta.weight' has shape (1, 512, 1, 1) in the checkpoint but (256, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.1.theta.bias' has shape (1,) in the checkpoint but (256,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.1.phi.weight' has shape (1, 512, 1, 1) in the checkpoint but (256, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_2.1.phi.bias' has shape (1,) in the checkpoint but (256,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.0.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.0.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.0.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.0.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.0.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.0.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.0.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.1.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.1.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.1.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.1.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.1.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.1.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.1.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.2.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.2.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.2.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.2.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.2.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.2.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.2.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.3.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.3.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.3.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.3.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.3.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.3.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.3.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.4.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.4.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.4.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.4.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.4.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.4.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.4.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.5.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.5.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.5.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.5.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.5.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.5.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.5.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.6.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.6.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.6.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.6.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.6.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.6.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.6.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.7.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.7.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.7.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.7.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.7.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.7.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.7.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.8.g.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.8.g.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.8.W.0.weight' has shape (1024, 1, 1, 1) in the checkpoint but (1024, 512, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.8.theta.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.8.theta.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.8.phi.weight' has shape (1, 1024, 1, 1) in the checkpoint but (512, 1024, 1, 1) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'backbone.NL_3.8.phi.bias' has shape (1,) in the checkpoint but (512,) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint WARNING: 'heads.classifier.weight' has shape (751, 2048) in the checkpoint but (0, 2048) in the model! Skipped.
+[10/09 18:07:10] fastreid.utils.checkpoint INFO: Some model parameters are not in the checkpoint:
+  [34mbackbone.NL_2.0.g.{weight, bias}[0m
+  [34mbackbone.NL_2.0.W.0.weight[0m
+  [34mbackbone.NL_2.0.theta.{weight, bias}[0m
+  [34mbackbone.NL_2.0.phi.{weight, bias}[0m
+  [34mbackbone.NL_2.1.g.{weight, bias}[0m
+  [34mbackbone.NL_2.1.W.0.weight[0m
+  [34mbackbone.NL_2.1.theta.{weight, bias}[0m
+  [34mbackbone.NL_2.1.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.0.g.{weight, bias}[0m
+  [34mbackbone.NL_3.0.W.0.weight[0m
+  [34mbackbone.NL_3.0.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.0.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.1.g.{weight, bias}[0m
+  [34mbackbone.NL_3.1.W.0.weight[0m
+  [34mbackbone.NL_3.1.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.1.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.2.g.{weight, bias}[0m
+  [34mbackbone.NL_3.2.W.0.weight[0m
+  [34mbackbone.NL_3.2.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.2.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.3.g.{weight, bias}[0m
+  [34mbackbone.NL_3.3.W.0.weight[0m
+  [34mbackbone.NL_3.3.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.3.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.4.g.{weight, bias}[0m
+  [34mbackbone.NL_3.4.W.0.weight[0m
+  [34mbackbone.NL_3.4.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.4.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.5.g.{weight, bias}[0m
+  [34mbackbone.NL_3.5.W.0.weight[0m
+  [34mbackbone.NL_3.5.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.5.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.6.g.{weight, bias}[0m
+  [34mbackbone.NL_3.6.W.0.weight[0m
+  [34mbackbone.NL_3.6.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.6.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.7.g.{weight, bias}[0m
+  [34mbackbone.NL_3.7.W.0.weight[0m
+  [34mbackbone.NL_3.7.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.7.phi.{weight, bias}[0m
+  [34mbackbone.NL_3.8.g.{weight, bias}[0m
+  [34mbackbone.NL_3.8.W.0.weight[0m
+  [34mbackbone.NL_3.8.theta.{weight, bias}[0m
+  [34mbackbone.NL_3.8.phi.{weight, bias}[0m
+  [34mheads.bottleneck.0.{weight, bias, running_mean, running_var}[0m
+  [34mheads.classifier.weight[0m
+[10/09 18:07:10] fastreid.utils.checkpoint INFO: The checkpoint contains parameters not used by the model:
+  [35mheads.bnneck.{weight, bias, running_mean, running_var, num_batches_tracked}[0m

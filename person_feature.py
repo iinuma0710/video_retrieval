@@ -1,5 +1,5 @@
 import sys
-sys.path.append("./person-reid")
+sys.path.append("./fast-reid")
 
 from fastreid.config import get_cfg
 from fastreid.engine import DefaultPredictor, default_argument_parser, default_setup
@@ -25,7 +25,7 @@ def setup(args):
 if __name__ == "__main__":
     args = default_argument_parser().parse_args()
     # args.config_file = "./configs/person_reid.yml"
-    args.config_file = "./person-reid/configs/person_reid.yml"
+    args.config_file = "./fast-reid/configs/person_reid.yml"
     cfg = setup(args)
     pred = DefaultPredictor(cfg)
     inputs = cv2.imread("input.png")

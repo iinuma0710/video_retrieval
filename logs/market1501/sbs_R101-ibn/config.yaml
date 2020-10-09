@@ -97,7 +97,7 @@ MODEL:
   - 58.395
   - 57.120000000000005
   - 57.375
-  WEIGHTS: ./fast-reid/checkpoints/market_sbs_R101-ibn.pth
+  WEIGHTS: fast-reid/checkpoints/market_sbs_R101-ibn.pth
 OUTPUT_DIR: logs/market1501/sbs_R101-ibn
 SOLVER:
   AMP_ENABLED: false

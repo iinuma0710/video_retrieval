@@ -67,3 +67,6 @@ jupyter/.ipynb_checkpoints/
 # pyth ファイル (モデルを保存したファイル)
 *.pyth
 *.pth
+
+logs/
+old/

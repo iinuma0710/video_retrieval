@@ -7,8 +7,12 @@ from fastreid.utils.checkpoint import Checkpointer
 
 import os
 import cv2
+import csv
+import copy
 import torch
+import random
 import numpy as np
+
 
 def setup(args):
     """
@@ -22,14 +26,76 @@ def setup(args):
     return cfg
 
 
+# 指定範囲から指定個数の整数をランダムに取得する
+def get_randoms(minimum, maximum, num):
+    random_list = []
+    while len(random_list) < num:
+        i = random.randint(minimum, maximum)
+        if i not in random_list:
+            random_list.append(i)
+    return random_list
+
+
+# 人物ごとの映像からランダムに 16 フレームを抜き出してくる
+def get_inputs(video_path):
+    # 映像を開く
+    video = cv2.VideoCapture(video_path)
+
+    # フレームに分解
+    frame_list = []
+    while True:
+        ret, frame = video.read()
+        if ret:
+            frame_list.append(frame)
+        else:
+            video.release()
+            break
+    
+    # ランダムに16フレームを抜き出してくる
+    indexes = get_randoms(0, len(frame_list)-1, 16)
+    frames = np.array(frame_list)[indexes]
+    # Fast-ReID の入力に合うように torch.tensor に変換して整形
+    inputs = torch.from_numpy(frames.astype(np.float32)).permute(0, 3, 1, 2)
+    return inputs
+
+
+def read_features_csv(args):
+    with open(args.csv, "r") as f:
+        reader = csv.reader(f, delimiter=" ")
+        features_list = [row for row in reader]
+    
+    return features_list
+
+
 if __name__ == "__main__":
+    # 初期設定
     args = default_argument_parser().parse_args()
-    # args.config_file = "./configs/person_reid.yml"
     args.config_file = "./fast-reid/configs/person_reid.yml"
     cfg = setup(args)
+    features_list = read_features_csv(args)
+
+    # ネットワークのロード
     pred = DefaultPredictor(cfg)
-    inputs = cv2.imread("input.png")
-    inputs = torch.from_numpy(inputs.astype(np.float32)).clone().unsqueeze(0).permute(0, 3, 1, 2)
-    print(inputs.size())
-    outputs = pred(inputs)
-    print(outputs.shape)
+
+    # 繰り返し処理で特徴ベクトルを抽出
+    person_fv_idx = 0
+    new_infos = []
+    person_fvs = []
+    for info in features_list:
+        # 人物の特徴ベクトルを抽出
+        new_info = copy.deepcopy(info)
+        inputs = get_inputs(info[5])
+        fv = np.mean(pred(inputs).numpy().copy(), axis=0)
+        person_fvs.append(fv)
+        # 特徴ベクトル情報の更新
+        new_info[4] = person_fv_idx
+        person_fv_idx += 1
+        new_infos.append(new_info)
+
+        print(new_info)
+    
+    person_fvs = np.array(person_fvs)
+    np.save(args.npy, person_fvs)
+    with open(args.csv, "w") as f:
+        writer = csv.writer(f, delimiter=" ")
+        writer.writerows(new_infos)

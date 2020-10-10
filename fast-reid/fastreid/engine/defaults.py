@@ -44,6 +44,12 @@ def default_argument_parser():
     """
     parser = argparse.ArgumentParser(description="fastreid Training")
     parser.add_argument("--config-file", default="", metavar="FILE", help="path to config file")
+    
+    # 特徴ベクトルの情報をまとめたファイル
+    parser.add_argument("--csv", default="", metavar="FILE", help="path to features file")
+    # 特徴ベクトルを保存しておく npy ファイル
+    parser.add_argument("--npy", default="", metavar="FILE", help="path to features file")
+
     parser.add_argument(
         "--finetune",
         action="store_true",

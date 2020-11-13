@@ -122,6 +122,7 @@ def perform_test(test_loader, model, test_meter, cfg):
     if cfg.TEST.EXTRACT_FEATURES:
         # 抽出した特徴ベクトルとラベルのデータを保存
         features = fvs.numpy()
+        features = features / np.array([np.sqrt(np.sum(features ** 2, axis=1))]).T
         np.save(cfg.FEATURES_FILE, features)
         idx_labels = torch.cat((vis.reshape(len(vis), -1), lbs.reshape(len(lbs), -1)), dim=1).numpy()
         np.save(cfg.LABELS_FILE, idx_labels)

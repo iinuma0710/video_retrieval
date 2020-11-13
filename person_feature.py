@@ -37,7 +37,7 @@ def get_randoms(minimum, maximum, num):
 
 
 # 人物ごとの映像からランダムに 16 フレームを抜き出してくる
-def get_inputs(video_path):
+def get_inputs(video_path, num=1):
     # 映像を開く
     video = cv2.VideoCapture(video_path)
 
@@ -52,7 +52,7 @@ def get_inputs(video_path):
             break
     
     # ランダムに16フレームを抜き出してくる
-    indexes = get_randoms(0, len(frame_list)-1, 16)
+    indexes = get_randoms(0, len(frame_list)-1, num)
     frames = np.array(frame_list)[indexes]
     # Fast-ReID の入力に合うように torch.tensor に変換して整形
     inputs = torch.from_numpy(frames.astype(np.float32)).permute(0, 3, 1, 2)

@@ -111,6 +111,14 @@ def ret_val():
             gallery_labels = np.array([int(gallery_label) for _, gallery_label in args.gallery_dict[query_person_id]])
             # 検索 (ランキングの作成)
             ranking = make_rank(query_idx, gallery_indexes)
+            res = []
+            ranking_new = []
+            for r in ranking:
+                i = gallery_indexes[r]
+                if i not in res:
+                    res.append(i)
+                    ranking_new.append(r)
+            ranking = np.array(ranking_new)
             # Average Precision の計算
             ap = calc_ap(int(query_action_id), gallery_labels[ranking])
             print("Action Label : {}, Person Label : {}, Average Precision : {}".format(query_action_id, query_person_id, ap))

@@ -45,7 +45,8 @@ def setup_logger(
             modules unchanged.
     """
     logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
+    # logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.ERROR)
     logger.propagate = False
 
     if abbrev_name is None:

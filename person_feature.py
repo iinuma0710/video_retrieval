@@ -36,7 +36,7 @@ def get_randoms(minimum, maximum, num):
     return random_list
 
 
-# 人物ごとの映像からランダムに 16 フレームを抜き出してくる
+# 人物ごとの映像からランダムに num フレームを抜き出してくる
 def get_inputs(video_path, num=1):
     # 映像を開く
     video = cv2.VideoCapture(video_path)
@@ -51,8 +51,9 @@ def get_inputs(video_path, num=1):
             video.release()
             break
     
-    # ランダムに16フレームを抜き出してくる
-    indexes = get_randoms(0, len(frame_list)-1, num)
+    # ランダムにnumフレームを抜き出してくる
+    # 最初の10フレームくらいは他の人が紛れてる子脳性があるので除外
+    indexes = get_randoms(10, len(frame_list)-1, num)
     frames = np.array(frame_list)[indexes]
     # Fast-ReID の入力に合うように torch.tensor に変換して整形
     inputs = torch.from_numpy(frames.astype(np.float32)).permute(0, 3, 1, 2)
@@ -65,6 +66,20 @@ def read_features_csv(args):
         features_list = [row for row in reader]
     
     return features_list
+
+# 人物特徴の抽出
+def feature_extractor(video_path):
+    # 初期設定
+    args = default_argument_parser().parse_args()
+    args.config_file = "./fast-reid/configs/person_reid.yml"
+    cfg = setup(args)
+
+    # 特徴ベクトルの抽出
+    pred = DefaultPredictor(cfg)
+    input_frames = get_inputs(video_path)
+    fv = np.mean(pred(input_frames).numpy().copy(), axis=0)
+
+    return fv
 
 
 if __name__ == "__main__":

@@ -50,7 +50,8 @@ def setup_logging(output_dir=None):
         _suppress_print()
 
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    # logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.ERROR)
     logger.propagate = False
     plain_formatter = logging.Formatter(
         "[%(asctime)s][%(levelname)s] %(name)s: %(lineno)4d: %(message)s",

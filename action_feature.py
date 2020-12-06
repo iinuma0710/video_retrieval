@@ -68,6 +68,41 @@ def extract_features(
     else:
         test(cfg=cfg)
 
+def feature_extractor(video_path):
+    with open("tmp.csv", "w") as f:
+        writer = csv.writer(f, delimiter=" ")
+        writer.writerows([[video_path, 0]])
+    
+    # 特徴抽出
+    logger = logging.get_logger(__name__)
+    torch.multiprocessing.set_start_method("forkserver")
+    os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3,4,5,6,7"
+    opts = [
+        "TRAIN.ENABLE", False,
+        "TEST.ENABLE", True,
+        "DATA.PATH_TO_TEST_FILE", "tmp.csv",
+        "DATA.SAMPLING_RATE", 8,
+        "TEST.NUM_ENSEMBLE_VIEWS", 4,
+        "TEST.NUM_SPATIAL_CROPS", 3,
+        "TEST.BATCH_SIZE", 12,
+        "TEST.EXTRACT_FEATURES", True,
+        "TEST.CHECKPOINT_FILE_PATH", "slowfast/checkpoints/SLOWFAST_8x8_R50_KINETICS600.pyth",
+        "NUM_GPUS", 1,
+        "FEATURES_FILE", "feature.npy",
+        "LABELS_FILE", "label.npy"
+    ]
+    extract_features("slowfast/configs/Kinetics/SLOWFAST_8x8_R50.yaml", opts=opts)
+
+    # 後始末
+    fvs = np.load("feature.npy")
+    fv = np.mean(fvs, axis=0)
+    norm_fv = fv / np.sqrt(np.sum(fv ** 2))
+    os.remove("tmp.csv")
+    os.remove("feature.npy")
+    os.remove("label.npy")
+
+    return norm_fv
+
 
 if __name__ == "__main__": 
     with open("/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/trecvid_2019/query/person_videos.csv", "r") as f:

@@ -49,6 +49,13 @@ def default_argument_parser():
     parser.add_argument("--csv", default="", metavar="FILE", help="path to features file")
     # 特徴ベクトルを保存しておく npy ファイル
     parser.add_argument("--npy", default="", metavar="FILE", help="path to features file")
+    # retrieval_system で読み込む設定
+    parser.add_argument('--data_dir', type=str)
+    parser.add_argument('--query_video', type=str)
+    parser.add_argument('--person_ret_num', type=int, default=5000)
+    parser.add_argument('--action_ret_num', type=int, default=100)
+    parser.add_argument('--add_to_gallery', action="store_true")
+    parser.add_argument('--save_result', action="store_true")
 
     parser.add_argument(
         "--finetune",

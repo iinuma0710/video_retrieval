@@ -4,6 +4,8 @@ import pprint
 import argparse
 import numpy as np
 
+# 人物映像の検出
+from detection import HumanDetectionAndTracking
 # 人物特徴の抽出
 from person_feature import feature_extractor as person_feature_extractor
 # 動作特徴の抽出
@@ -39,6 +41,10 @@ def parse_args():
         raise NoFileExistsError("{} does not exist.".format(args.gallery_action_features_npy))
 
     return args
+
+# 人物映像の抽出
+def person_detection():
+    pass
 
 # 人物の検索
 def person_retrieval(args):
@@ -80,6 +86,7 @@ def action_retrieval(args, person_result):
 if __name__ == "__main__":
     args = parse_args()
 
+    # 
     # 人物の検索
     person_result = person_retrieval(args)
     # 動作の検索

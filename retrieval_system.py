@@ -1,11 +1,12 @@
 import os
 import csv
+import shutil
 import pprint
 import argparse
 import numpy as np
 
 # 人物映像の検出
-from detection import HumanDetectionAndTracking
+from detection_2 import HumanDetectionAndTracking
 # 人物特徴の抽出
 from person_feature import feature_extractor as person_feature_extractor
 # 動作特徴の抽出
@@ -25,6 +26,7 @@ def parse_args():
     parser.add_argument('--action_ret_num', type=int, default=100)
     parser.add_argument('--add_to_gallery', action="store_true")
     parser.add_argument('--save_result', action="store_true")
+    parser.add_argument('--detection', action="store_true")
     args = parser.parse_args()
 
     # 検索に必要なファイルのパスを追加
@@ -43,8 +45,20 @@ def parse_args():
     return args
 
 # 人物映像の抽出
-def person_detection():
-    pass
+def person_detection(args):
+    output_dir = os.path.join(args.data_dir, "query_videos")
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    detector = HumanDetectionAndTracking(
+        input_video=args.query_video,
+        output_dir=output_dir
+    )
+    query_videos = detector.detect_and_track_human()
+
+    print("\n人物検出の結果")
+    pprint.pprint(query_videos)
+
 
 # 人物の検索
 def person_retrieval(args):
@@ -83,13 +97,29 @@ def action_retrieval(args, person_result):
     return ranking, result_video_path_list
 
 
-if __name__ == "__main__":
-    args = parse_args()
-
-    # 
+# 検索のみを行う
+def retrieval(args):
     # 人物の検索
     person_result = person_retrieval(args)
     # 動作の検索
     action_result, path_list = action_retrieval(args, person_result)
     # 検索結果の出力
     pprint.pprint(path_list)
+
+
+# 検出と検索を行う
+def retrieval_with_detection(args):
+    # 映像の検出
+    person_detection(args)
+
+    shutil.rmtree(os.path.join(args.data_dir, "query_videos"))
+
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    if args.detection:
+        retrieval_with_detection(args)
+    else:
+        retrieval(args)
+        

@@ -238,6 +238,7 @@ class HumanDetectionAndTracking(object):
             frame_idx += 1
             
         # 動画に書き出す
+        output_videos = []
         for id in human_id_dict:
             # 短すぎる場合には飛ばす
             if len(frame_idx_dict[id]) < 32:
@@ -249,6 +250,9 @@ class HumanDetectionAndTracking(object):
             # 書き出し
             track_array = np.array(human_id_dict[id])
             self.get_video(track_array, frame_idx_dict[id])
+            output_videos.append(self.output_file)
+
+        return output_videos
 
 
 # 引数の整理

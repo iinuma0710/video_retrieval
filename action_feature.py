@@ -68,14 +68,15 @@ def extract_features(
     else:
         test(cfg=cfg)
 
-def feature_extractor(video_path):
+def feature_extractor(video_path_list):
+    tmp_csv = [[video, idx] for idx, video in enumerate(video_path_list)]
     with open("tmp.csv", "w") as f:
         writer = csv.writer(f, delimiter=" ")
-        writer.writerows([[video_path, 0]])
+        writer.writerows(tmp_csv)
     
     # 特徴抽出
     logger = logging.get_logger(__name__)
-    torch.multiprocessing.set_start_method("forkserver")
+    # torch.multiprocessing.set_start_method("forkserver")
     os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3,4,5,6,7"
     opts = [
         "TRAIN.ENABLE", False,
@@ -95,13 +96,17 @@ def feature_extractor(video_path):
 
     # 後始末
     fvs = np.load("feature.npy")
-    fv = np.mean(fvs, axis=0)
-    norm_fv = fv / np.sqrt(np.sum(fv ** 2))
+    lbs = np.load("label.npy")
+    norm_fvs = []
+    for i in range(len(video_path_list)):
+        idxes = [l[0] for l in lbs if l[1] == i]
+        fv = np.mean(fvs[idxes], axis=0)
+        norm_fvs.append(fv / np.sqrt(np.sum(fv ** 2)))
     os.remove("tmp.csv")
     os.remove("feature.npy")
     os.remove("label.npy")
 
-    return norm_fv
+    return norm_fvs
 
 
 if __name__ == "__main__": 

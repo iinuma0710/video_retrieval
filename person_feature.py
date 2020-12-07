@@ -68,18 +68,21 @@ def read_features_csv(args):
     return features_list
 
 # 人物特徴の抽出
-def feature_extractor(video_path):
+def feature_extractor(video_path_list, args):
     # 初期設定
-    args = default_argument_parser().parse_args()
+    # args = default_argument_parser().parse_args()
     args.config_file = "./fast-reid/configs/person_reid.yml"
     cfg = setup(args)
 
     # 特徴ベクトルの抽出
+    fvs = []
     pred = DefaultPredictor(cfg)
-    input_frames = get_inputs(video_path)
-    fv = np.mean(pred(input_frames).numpy().copy(), axis=0)
+    for video_path in video_path_list:
+        input_frames = get_inputs(video_path)
+        fv = pred(input_frames)
+        fvs.append(np.mean(fv.numpy().copy(), axis=0))
 
-    return fv
+    return fvs
 
 
 if __name__ == "__main__":

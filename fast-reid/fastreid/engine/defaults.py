@@ -56,6 +56,7 @@ def default_argument_parser():
     parser.add_argument('--action_ret_num', type=int, default=100)
     parser.add_argument('--add_to_gallery', action="store_true")
     parser.add_argument('--save_result', action="store_true")
+    parser.add_argument('--person_detection', action="store_true")
 
     parser.add_argument(
         "--finetune",

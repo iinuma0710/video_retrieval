@@ -112,7 +112,7 @@ def retrieval_with_detection(args):
     # 映像の検出
     person_detection(args)
 
-    shutil.rmtree(os.path.join(args.data_dir, "query_videos"))
+    # shutil.rmtree(os.path.join(args.data_dir, "query_videos"))
 
 
 if __name__ == "__main__":

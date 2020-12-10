@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>クエリページ</title>
+    </head>
+    <body>
+        <h1>検索用のクエリを探すページ</h1>
+        <h3>クエリ映像のパス：</h3>
+        <form action="/query" method="POST" enctype="multipart/form-data">
+            <input type="text" name="video_path" placeholder="ディレクトリorフルパスの一部">
+            <input type="submit" value="表示">
+        </form>
+        <h3>クエリ映像の候補：</h3>
+        {% for file in file_list %}
+            <p>{{ file }}</p>
+            <video src="{{ file }}" loop autoplay muted></video>
+        {% endfor %}
+    </body>
+</html>

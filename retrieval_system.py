@@ -17,37 +17,6 @@ from person_feature import feature_extractor as person_feature_extractor
 from action_feature import feature_extractor as action_feature_extractor
 
 
-# class NoFileExistsError(Exception):
-#     """ 必要なファイルがなかったときに呼び出されるエラー """
-
-# # コマンドライン引数から検索の設定を取得
-# def parse_args():
-#     # コマンドライン引数
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('--data_dir', type=str)
-#     parser.add_argument('--query_video', type=str)
-#     parser.add_argument('--person_ret_num', type=int, default=5000)
-#     parser.add_argument('--action_ret_num', type=int, default=100)
-#     parser.add_argument('--add_to_gallery', action="store_true")
-#     parser.add_argument('--save_result', action="store_true")
-#     parser.add_argument('--person_detection', action="store_true")
-#     args = parser.parse_args()
-
-#     # 検索に必要なファイルのパスを追加
-#     args.gallery_features_csv = os.path.join(args.data_dir, "features.csv")
-#     args.gallery_action_features_npy = os.path.join(args.data_dir, "action_features.npy")
-#     args.gallery_person_features_npy = os.path.join(args.data_dir, "person_features.npy")
-
-#     # ファイルの存在確認
-#     if not os.path.exists(args.gallery_features_csv):
-#         raise NoFileExistsError("{} does not exist.".format(args.gallery_features_csv))
-#     if not os.path.exists(args.gallery_person_features_npy):
-#         raise NoFileExistsError("{} does not exist.".format(args.gallery_person_features_npy))
-#     if not os.path.exists(args.gallery_action_features_npy):
-#         raise NoFileExistsError("{} does not exist.".format(args.gallery_action_features_npy))
-
-#     return args
-
 # 人物映像の抽出
 def person_detection(args):
     output_dir = os.path.join(args.data_dir, "query_videos")
@@ -146,8 +115,10 @@ def retrieval(args):
 # 検出と検索を行う
 def retrieval_with_detection(args):
     # 映像の検出
-    person_detection(args)
-    # shutil.rmtree(os.path.join(args.data_dir, "query_videos"))
+    print("Detecting person videos...")
+    person_videos = person_detection(args)
+    
+
 
 
 if __name__ == "__main__":

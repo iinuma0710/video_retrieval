@@ -7,6 +7,26 @@
   </head>
   <body>
     <h1>動画検索のページ</h1>
-    <p>クエリとなる映像を選択してください</p>
+    
+    <form action="/retrieval" method="POST" enctype="multipart/form-data">
+      <h3>クエリ映像のパス：</h3>
+      <input type="text" name="query_video" placeholder="クエリ動画のフルパス">
+      <h3>検索対象の情報を格納したディレクトリ：</h3>
+      <input type="text" name="gallery_dir" placeholder="検索対象の特徴ベクトル・CSV">
+      <h3>人物検索の上限数：</h3>
+      <input type="text" name="person_ret_num" value="5000">
+      <h3>動作検索の上限数：</h3>
+      <input type="text" name="action_ret_num" value="100">
+      <h3>クエリをデータベースに追加する：</h3>
+      <input type="radio" name="add_to_gallery" value="1"> 追加する
+      <br><br><br>
+      <input type="submit" value="検索">
+    </form>
+
+    <h2>検索結果：</h2>
+    {% for i in range(file_num) %}
+      <p>{{ i + 1 }} : {{ file_list[i] }}</p>
+      <video src="{{ display_file_list[i] }}" loop autoplay muted></video>
+    {% endfor %}
   </body>
 </html>

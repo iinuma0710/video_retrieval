@@ -1,0 +1,170 @@
+import os
+import csv
+import numpy as np
+import argparse
+
+
+class NoFileExistsError(Exception):
+    """ 必要なファイルがなかったときに呼び出されるエラー """
+
+
+# feature_csv_path で指定されたファイルから情報を読み込む
+def load_data(csv_file):
+    with open(csv_file, "r") as fp:
+        reader = csv.reader(fp, delimiter=' ')
+        action_feature_idx_dict = {}
+        action_label_dict = {}
+        person_feature_idx_dict = {}
+        person_label_dict = {}
+        for r in reader:
+            # 動作の GT がある場合
+            if r[6]:
+                action_feature_idx = int(r[3])
+                action_label = int(r[6])
+                action_feature_idx_dict[action_feature_idx] = action_label
+                if action_label != 99:
+                    if action_label in action_label_dict:
+                        action_label_dict[action_label].append(action_feature_idx)
+                    else:
+                        action_label_dict[action_label] = [action_feature_idx]
+            # 人物の GT がある場合
+            if r[7]:
+                person_feature_idx = int(r[4])
+                person_label = int(r[7])
+                person_feature_idx_dict[person_feature_idx] = person_label
+                if person_label != 99:
+                    if person_label in person_label_dict:
+                        person_label_dict[person_label].append(person_feature_idx)
+                    else:
+                        person_label_dict[person_label] = [person_feature_idx]
+    
+    return action_feature_idx_dict, action_label_dict, person_feature_idx_dict, person_label_dict
+
+
+# 類似度のランキングを作成する
+def retrieval(query_idx, features, metric="l2+norm", limit=100):
+    # 類似度の計算
+    # 値が小さくなるほど類似度が高くなるように，cos類似度は値を-1倍している
+    if metric == "l2+norm":
+        normalized = features / np.array([np.sqrt(np.sum(features ** 2, axis=1))]).T
+        similarity = np.sum((normalized - normalized[query_idx]) ** 2, axis=1)
+    elif metric == "l2":
+        similarity = np.sum((normalized - normalized[query_idx]) ** 2, axis=1)
+    elif metric == "cosine":
+        inner_product = np.array([np.dot(fv, features[query_idx]) for fv in features])
+        norm = np.array([np.linalg.norm(fv) * np.linalg.norm(features[query_idx]) for fv in features])
+        similarity = - inner_product / norm
+    
+    # 類似度スコア順にソートして limit で指定された上位のインデックスを返す
+    ranking = np.argsort(similarity)
+    return ranking[:limit]
+
+
+# クエリごとの Average Precision を計算する
+def calc_ap(query_idx, rank, feature_idx_dict):
+    gt = feature_idx_dict[query_idx]
+    correct_num = 0
+    total_num = 0
+    precision_sum = 0.0
+    for idx in rank:
+        total_num += 1
+        if gt == feature_idx_dict[idx]:
+            # 正解ならば正解数と precision を加算していく
+            correct_num += 1
+            precision_sum += correct_num / total_num
+        else:
+            # 不正解なら何もしない
+            continue
+    # average precision を計算
+    ap = precision_sum / correct_num
+    return ap
+
+
+# mAP を計算する
+def calc_map(queries, rank, feature_idx_dict):
+    pass
+
+
+# 引数の整理
+def parse_args():
+    parser = argparse.ArgumentParser()
+    # データディレクトリの指定
+    parser.add_argument('--data_dir',
+                        type=str,
+                        required=True,
+                        help="Path to data directory"
+                       )
+    # 特徴ベクトルの距離指標
+    parser.add_argument('--metric',
+                        type=str,
+                        choices=["l2+norm", "l2", "cos"],
+                        default="l2+norm",
+                        help="Distance betweeen feature vectors"
+                       )
+    # 上位何位まで検索を行うかを指定
+    parser.add_argument('--limit',
+                        type=int,
+                        default=100,
+                        help="Limit of the ranking"
+                       )
+    # 検索結果の評価を行うかどうかを指定
+    parser.add_argument('--validation',
+                        type=bool,
+                        default=True,
+                        help="Validate retrieval results or not"
+                       )
+
+    args = parser.parse_args()
+    args.gallery_features_csv = os.path.join(args.data_dir, "gallery/features.csv")
+    args.gallery_action_features_npy = os.path.join(args.data_dir, "gallery/action_feratures.npy")
+    args.gallery_person_features_npy = os.path.join(args.data_dir, "gallery/person_feratures.npy")
+    args.query_features_csv = os.path.join(args.data_dir, "query/features.csv")
+    args.query_action_features_npy = os.path.join(args.data_dir, "query/action_feratures.npy")
+    args.query_person_features_npy = os.path.join(args.data_dir, "query/person_feratures.npy")
+
+    # 最低限必要なファイルがあるかどうかを確認する
+    if not os.path.exists(args.gallery_features_csv):
+        raise NoFileExistsError("{} does not exist.".format(args.gallery_features_csv))
+    if not os.path.exists(args.query_features_csv):
+        raise NoFileExistsError("{} does not exist.".format(args.query_features_csv))
+    if not os.path.exists(args.gallery_action_features_npy):
+        raise NoFileExistsError("{} does not exist.".format(args.gallery_action_features_npy))
+    if not os.path.exists(args.query_action_features_npy):
+        raise NoFileExistsError("{} does not exist.".format(args.query_action_features_npy))
+
+    return args
+
+
+if __name__ == "__main__":
+    """
+    データディレクトリの構造は次のようにする
+        /data_directory
+            |- /gallery or /query
+                |- original_videos.csv
+                |- person_videos.csv
+                |- features.csv
+                |- action_features.npy
+                |- person_features.npy
+
+    検索結果のランキングは /dara_directory/query/ranking.npy に保存される
+    """
+    args = parse_args()
+    # action_features = np.load("data/eastenders/action_features_all.npy")
+    # CSV ファイルから特徴量のインデックスとラベルの情報を読み出す
+    gallery_action_features_dict, gallery_action_label_dict, gallery_person_feature_dict, gallery_person_label_dict = load_data(args.gallery_features_csv)
+    query_action_feature_dict, query_action_label_dict, query_person_feature_dict, query_person_label_dict = load_data(args.query_features_csv)
+    # 特徴量のロード
+    # cnt = 0
+    # label_ap_sum = 0.0
+    # for action_label in action_label_dict:
+    #     label_ap = 0.0
+    #     for idx in action_label_dict[action_label]:
+    #         rank = retrieval(idx, action_features)
+    #         ap = calc_ap(idx, rank, feature_idx_dict)
+    #         label_ap += ap / len(action_label_dict[action_label])
+    #         print("query_idx: {}, action_label: {}, AP={}".format(idx, action_label, ap))
+    #     label_ap_sum += label_ap
+    #     cnt += 1
+    #     print("action_label: {}, AP={}".format(action_label, label_ap))
+    # mean_ap = label_ap_sum / cnt
+    # print("mAP: ", mean_ap)

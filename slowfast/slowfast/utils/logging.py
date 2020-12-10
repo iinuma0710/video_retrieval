@@ -65,7 +65,7 @@ def setup_logging(output_dir=None):
         logger.addHandler(ch)
 
     if output_dir is not None and du.is_master_proc(du.get_world_size()):
-        filename = os.path.join(output_dir, "stdout.log")
+        filename = os.path.join(output_dir, "logs/stdout.log")
         fh = logging.StreamHandler(_cached_log_stream(filename))
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(plain_formatter)

@@ -68,7 +68,7 @@ def extract_features(
     else:
         test(cfg=cfg)
 
-def feature_extractor(video_path_list):
+def feature_extractor(video_path_list, num_gpus=1):
     tmp_csv = [[video, idx] for idx, video in enumerate(video_path_list)]
     with open("tmp.csv", "w") as f:
         writer = csv.writer(f, delimiter=" ")
@@ -88,7 +88,7 @@ def feature_extractor(video_path_list):
         "TEST.BATCH_SIZE", 12,
         "TEST.EXTRACT_FEATURES", True,
         "TEST.CHECKPOINT_FILE_PATH", "slowfast/checkpoints/SLOWFAST_8x8_R50_KINETICS600.pyth",
-        "NUM_GPUS", 1,
+        "NUM_GPUS", num_gpus,
         "FEATURES_FILE", "feature.npy",
         "LABELS_FILE", "label.npy"
     ]

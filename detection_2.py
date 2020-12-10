@@ -2,8 +2,10 @@ import os
 import sys
 import cv2
 import csv
+import time
 import glob
 import argparse
+import subprocess
 import numpy as np
 
 from darknet import *
@@ -250,7 +252,11 @@ class HumanDetectionAndTracking(object):
             # 書き出し
             track_array = np.array(human_id_dict[id])
             self.get_video(track_array, frame_idx_dict[id])
-            output_videos.append(self.output_file)
+            # コーデックを変換
+            h264_video = os.path.join(self.output_dir, "query_" + str(round(time.time() * 10)) + ".mp4")
+            subprocess.run(["ffmpeg", "-i", self.output_file, "-vcodec", "libx264", h264_video])
+            output_videos.append(h264_video)
+            os.remove(self.output_file)
 
         return output_videos
 

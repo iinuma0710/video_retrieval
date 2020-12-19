@@ -26,7 +26,57 @@
     <h2>検索結果：</h2>
     {% for i in range(file_num) %}
       <p>{{ i + 1 }} : {{ file_list[i] }}</p>
+      <div>
+        <label for="{{ action_id_list[i] }}">動作 {{ i + 1 }}：</label>
+        <input type="checkbox" id="{{ action_id_list[i] }}" value=1>，
+        <label for="{{ person_id_list[i] }}">人物 {{ i + 1 }}：</label>
+        <input type="checkbox" id="{{ person_id_list[i] }}" value=1>
+      </div>
       <video src="{{ display_file_list[i] }}" loop autoplay muted></video>
     {% endfor %}
+
+    <div>
+      <input type="button" value="AP を計算" onclick="buttonClick()">
+      <label for="exclude_top">1位の結果を計算から除外する：</label>
+      <input type="checkbox" id="exclude_top" value=1>
+    </div>
   </body>
 </html>
+
+<script type="text/javascript">
+  var action_id_list = {{ action_id_list | tojson }};
+  var person_id_list = {{ person_id_list | tojson }};
+
+  function buttonClick() {
+    var exclude_top = document.getElementById("exclude_top").checked;
+
+    var action_total_num = 0;
+    var action_correct_num = 0;
+    var action_ap = 0.0;
+    for (let action_id of action_id_list) {
+      if (exclude_top && action_id === "action_1") { continue }
+      action_total_num += 1
+      if (document.getElementById(action_id).checked) {
+        action_correct_num += 1;
+        action_ap += action_correct_num / action_total_num
+      }
+    }
+    action_ap = action_correct_num == 0 ? 0.0 : action_ap / action_correct_num
+
+    var person_total_num = 0;
+    var person_correct_num = 0;
+    var person_ap = 0.0;
+    for (let person_id of person_id_list) {
+      if (exclude_top && person_id === "person_1") { continue }
+      person_total_num += 1
+      if (document.getElementById(person_id).checked) {
+        person_correct_num += 1;
+        person_ap += person_correct_num / person_total_num
+      }
+    }
+    person_ap = person_correct_num == 0 ? 0.0 : person_ap / person_correct_num
+
+
+    alert("動作認識：" + action_ap + " (" + action_correct_num + "/" + action_total_num +")\n人物同定：" + person_ap + " (" + person_correct_num + "/" + person_total_num +")");
+  }
+</script>

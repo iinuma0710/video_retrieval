@@ -85,10 +85,27 @@ def retrieval():
 		common_path = os.path.commonpath(file_list)
 		os.symlink(common_path, static_gallery_video_dir)
 		display_file_list = [f.replace(common_path, static_gallery_video_dir) for f in file_list]
+		file_num = len(file_list)
+		action_id_list = ["action_" + str(i + 1) for i in range(file_num)]
+		person_id_list = ["person_" + str(i + 1) for i in range(file_num)]
 
-		return render_template('retrieval.html', file_list=file_list, display_file_list=display_file_list, file_num=len(file_list))
+		return render_template(
+			'retrieval.html',
+			file_list=file_list,
+			display_file_list=display_file_list,
+			file_num=file_num,
+			action_id_list=action_id_list,
+			person_id_list=person_id_list
+		)
 	else:
-		return render_template('retrieval.html', file_list=[], display_file_list=[], file_num=0)
+		return render_template(
+			'retrieval.html',
+			file_list=[],
+			display_file_list=[],
+			file_num=0,
+			action_id_list=[],
+			person_id_list=[]
+		)
 
 
 # クエリの動画を探すためのページ

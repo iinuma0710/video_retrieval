@@ -15,15 +15,19 @@
       <input type="text" name="gallery_dir" placeholder="検索対象の特徴ベクトル・CSV">
       <h3>人物検索の上限数：</h3>
       <input type="text" name="person_ret_num" value="5000">
-      <h3>動作検索の上限数：</h3>
+      <h3>検索結果の表示件数：</h3>
       <input type="text" name="action_ret_num" value="100">
-      <h3>クエリをデータベースに追加する：</h3>
-      <input type="radio" name="add_to_gallery" value="1"> 追加する
+      <br>
+      <label for="add_to_query">クエリをデータベースに追加：</label>
+      <input type="checkbox" id="add_to_query" name="add_to_query" value=1>
+      <br>
+      <label for="person_only">人物検索のみを行う：</label>
+      <input type="checkbox" id="person_only" name="person_only" value=1>
       <br><br><br>
       <input type="submit" value="検索">
     </form>
 
-    <h2>検索結果：</h2>
+    <h2>検索結果 ({{ file_num }}件)：</h2>
     {% for i in range(file_num) %}
       <p>{{ i + 1 }} : {{ file_list[i] }}</p>
       <div>

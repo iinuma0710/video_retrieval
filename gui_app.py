@@ -29,7 +29,7 @@ def cosine_similarity(query_fv, gallery_fvs, person_ret_num):
 # L2ノルムによる検索
 def l2_similarity(query_fv, gallery_fvs, action_ret_num):
     similarity = np.array([np.dot(fv, query_fv) for fv in gallery_fvs])
-    ranking = np.argsort(-similarity)[:action_ret_num]
+    ranking = np.argsort(similarity)[:action_ret_num]
     return ranking
 
 
@@ -55,17 +55,34 @@ def retrieval_person_action(args):
     action_gallery_fvs = np.array([action_fvs[int(d[0])] for d in refined_data_list])
     action_result = l2_similarity(action_query_fv, action_gallery_fvs, args.action_ret_num)
     result_data_list = [refined_data_list[i] for i in action_result]
-    
-    # 検索結果の出力
-    res_list = [d[2] for d in result_data_list]
-    return res_list
+    action_res_list = [d[2] for d in result_data_list]
+
+    return action_res_list
+
+
+# 人物の検索のみを行う関数
+def retrieval_person(args):
+    # データの読み込み
+    print("Reading retrieval data ...")
+    person_fvs = np.load(args.gallery_person_features_npy)
+    with open(args.gallery_features_csv, "r") as f:
+        data_list = [row for row in csv.reader(f)]
+        
+    # 人物の検索
+    print("Retrieving with person features ...")
+    person_query_fv = person_feature_extractor([args.query_video], args)[0]
+    person_gallery_fvs = np.array([person_fvs[int(d[1])] for d in data_list])
+    person_result = cosine_similarity(person_query_fv, person_gallery_fvs, args.person_ret_num)
+    refined_data_list = [data_list[i] for i in person_result]
+    person_res_list = [d[2] for d in refined_data_list]
+	
+    return person_res_list[:args.action_ret_num]
 
 
 @app.route('/retrieval', methods=['POST', 'GET'])
 def retrieval():
 	# 以前のシンボリックリンクがないか確認
 	static_gallery_video_dir = "static/gallery_videos"
-	print(os.path.exists(static_gallery_video_dir))
 	if os.path.exists(static_gallery_video_dir):
 		os.unlink(static_gallery_video_dir)
 	
@@ -80,7 +97,11 @@ def retrieval():
 		args.gallery_action_features_npy = os.path.join(args.data_dir, "action_features.npy")
 		args.gallery_person_features_npy = os.path.join(args.data_dir, "person_features.npy")
 		# 検索を行う
-		file_list = retrieval_person_action(args)
+		print(request.form.get('person_only'))
+		if request.form.get('person_only'):
+			file_list = retrieval_person(args)
+		else:
+			file_list = retrieval_person_action(args)
 		# 共通のパスを取得し，static/ ディレクトリ以下にシンボリックリンクを貼る
 		common_path = os.path.commonpath(file_list)
 		os.symlink(common_path, static_gallery_video_dir)

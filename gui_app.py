@@ -28,7 +28,7 @@ def cosine_similarity(query_fv, gallery_fvs, person_ret_num):
 
 # L2ノルムによる検索
 def l2_similarity(query_fv, gallery_fvs, action_ret_num):
-    similarity = np.array([np.dot(fv, query_fv) for fv in gallery_fvs])
+    similarity = np.sum((gallery_fvs - query_fv) ** 2, axis=1)
     ranking = np.argsort(similarity)[:action_ret_num]
     return ranking
 
@@ -38,6 +38,7 @@ def retrieval_person_action(args):
     # データの読み込み
     print("Reading retrieval data ...")
     action_fvs = np.load(args.gallery_action_features_npy)
+    np.save("action_fv_1", action_fvs[34357])
     person_fvs = np.load(args.gallery_person_features_npy)
     with open(args.gallery_features_csv, "r") as f:
         data_list = [row for row in csv.reader(f)]
@@ -52,6 +53,7 @@ def retrieval_person_action(args):
     # 動作の検索
     print("Retrieving with action features ...")
     action_query_fv = action_feature_extractor([args.query_video])[0]
+    np.save("action_fv_2", action_query_fv)
     action_gallery_fvs = np.array([action_fvs[int(d[0])] for d in refined_data_list])
     action_result = l2_similarity(action_query_fv, action_gallery_fvs, args.action_ret_num)
     result_data_list = [refined_data_list[i] for i in action_result]
@@ -79,6 +81,25 @@ def retrieval_person(args):
     return person_res_list[:args.action_ret_num]
 
 
+# 検索を行う関数
+def retrieval_action(args):
+    # データの読み込み
+    print("Reading retrieval data ...")
+    action_fvs = np.load(args.gallery_action_features_npy)
+    with open(args.gallery_features_csv, "r") as f:
+        data_list = [row for row in csv.reader(f)]
+        
+    # 動作の検索
+    print("Retrieving with action features ...")
+    action_query_fv = action_feature_extractor([args.query_video])[0]
+    action_gallery_fvs = np.array([action_fvs[int(d[0])] for d in data_list])
+    action_result = l2_similarity(action_query_fv, action_gallery_fvs, args.action_ret_num)
+    result_data_list = [data_list[i] for i in action_result]
+    action_res_list = [d[2] for d in result_data_list]
+
+    return action_res_list
+
+
 @app.route('/retrieval', methods=['POST', 'GET'])
 def retrieval():
 	# 以前のシンボリックリンクがないか確認
@@ -97,9 +118,10 @@ def retrieval():
 		args.gallery_action_features_npy = os.path.join(args.data_dir, "action_features.npy")
 		args.gallery_person_features_npy = os.path.join(args.data_dir, "person_features.npy")
 		# 検索を行う
-		print(request.form.get('person_only'))
 		if request.form.get('person_only'):
 			file_list = retrieval_person(args)
+		elif request.form.get('action_only'):
+			file_list = retrieval_action(args)
 		else:
 			file_list = retrieval_person_action(args)
 		# 共通のパスを取得し，static/ ディレクトリ以下にシンボリックリンクを貼る
@@ -166,7 +188,7 @@ def query():
 		display_file_list = [f.replace(common_path, static_query_video_dir) for f in file_list]
 		# 映像が多い場合には50件だけ表示
 		# todo : ページネーションで全件表示
-		return render_template('query.html', file_list=file_list[:50], display_file_list=display_file_list[:50], file_num=len(file_list))
+		return render_template('query.html', file_list=file_list, display_file_list=display_file_list, file_num=len(file_list))
 	else:
 		return render_template('query.html', file_list=[], display_file_list=[], file_num=0)
 

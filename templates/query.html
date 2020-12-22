@@ -16,7 +16,7 @@
             <input type="submit" value="表示">
         </form>
 
-        <h3>クエリ映像の候補：</h3>
+        <h3>クエリ映像の候補 ({{ file_num }}件)：</h3>
         {% for i in range(file_num) %}
             <p>{{ file_list[i] }}</p>
             <video src="{{ display_file_list[i] }}" loop autoplay muted></video>

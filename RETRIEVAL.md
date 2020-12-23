@@ -176,10 +176,125 @@
 - 人物・動作の検索 なし (人物の登場が少なすぎるため)
 
 ## Down stairs
-- クエリ：
+- クエリ：/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot8_732_id_91883.mp4
 - 人物のみの検索 (人物AP：)
   - 
 - 動作のみの検索 (動作AP：)
   - 
 - 人物・動作の検索 (人物AP：，動作AP)
   - 
+
+## ビリヤード
+意外とビリヤード台などは取れていない．
+/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot6_1636_id_75829.mp4
+/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot7_1291_id_84030.mp4
+
+## 歩いてくる
+- クエリ：/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot42_2249_id_470431.mp4
+- 人物のみの検索 (人物AP：10.1% (8/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot64_549_id_720112.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot64_549_id_720104.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot71_1592_id_800820.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot148_1637_id_1588384.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot43_1119_id_481355.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot64_549_id_720105.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot149_249_id_1592578.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot62_205_id_695948.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot175_1299_id_1853363.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot100_540_id_1102884.mp4
+- 動作のみの検索 (動作AP：52.6% (41/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot48_2033_id_549738.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot128_327_id_1369676.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot17_108_id_190050.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot123_190_id_1310115.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot177_188_id_1869895.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot184_1322_id_1945998.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot51_354_id_576250.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot104_432_id_1135609.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot47_1444_id_533604.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot118_166_id_1268343.mp4
+- 人物・動作の検索 (人物AP：15.6% (4/100)，動作AP：39.9% (30/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot48_2033_id_549738.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot128_327_id_1369676.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot17_108_id_190050.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot123_190_id_1310115.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot177_188_id_1869895.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot184_1322_id_1945998.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot51_354_id_576250.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot118_166_id_1268343.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot7_950_id_82917.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot95_1794_id_1052723.mp4
+
+## Sitting on couch
+- クエリ：/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot8_435_id_90155.mp4
+- 人物のみの検索 (人物AP：36.3% (11/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot8_435_id_90162.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot8_467_id_90293.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot8_1875_id_98015.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot93_1240_id_1026214.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot60_868_id_677316.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot172_280_id_1826214.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot197_102_id_2075670.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot8_464_id_90280.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot2_1242_id_29948.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot227_1521_id_2393208.mp4
+- 動作のみの検索 (動作AP：62.6% (50/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot218_1743_id_2288725.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot112_189_id_1209823.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot1_60_id_11806.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot26_1794_id_282666.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot119_1149_id_1278646.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot158_341_id_1678935.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot21_1342_id_231057.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot176_552_id_1860237.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot173_608_id_1833908.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot188_898_id_1993268.mp4
+- 人物・動作の検索 (人物AP：22.8% (15/100)，動作AP：50.9% (31/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot26_1794_id_282666.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot173_608_id_1833908.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot119_1149_id_1278659.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot200_608_id_2098027.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot192_1453_id_2038990.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot199_1271_id_2092363.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot1_62_id_11839.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot57_234_id_643130.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot27_506_id_286058.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot57_234_id_643137.mp4
+
+
+## Stand up
+Sit down も同じくらい含まれる
+- クエリ：/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot115_1184_id_1246634.mp4
+- 人物のみの検索 (人物AP：22.8% (7/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot115_1182_id_1246613.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot225_280_id_2362315.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot196_742_id_2068496.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot62_189_id_695830.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot37_2267_id_413171.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot227_105_id_2383578.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot104_1128_id_1138556.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot112_1632_id_1218279.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot113_510_id_1222702.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot130_1645_id_1401391.mp4
+- 動作のみの検索 (動作AP：38.0% (7/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot159_867_id_1692288.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot28_1713_id_304834.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot115_440_id_1242922.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot116_723_id_1254863.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot62_793_id_699079.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot21_391_id_224520.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot54_70_id_606516.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot228_572_id_2397502.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot53_1304_id_601484.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot119_649_id_1276251.mp4
+- 人物・動作の検索 (人物AP：100% (1/100)，動作AP：31.3% (8/100))
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot116_723_id_1254863.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot62_793_id_699079.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot54_70_id_606516.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot228_572_id_2397502.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot48_1279_id_544943.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot135_1145_id_1470224.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot51_1590_id_582272.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot57_155_id_642596.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot111_1398_id_1207000.mp4
+  - /net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/shot115_1182_id_1246613.mp4

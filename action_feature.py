@@ -77,7 +77,7 @@ def feature_extractor(video_path_list, num_gpus=1):
     # 特徴抽出
     logger = logging.get_logger(__name__)
     # torch.multiprocessing.set_start_method("forkserver")
-    os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3,4,5,6,7"
+    os.environ["CUDA_VISIBLE_DEVICES"]="7"
     opts = [
         "TRAIN.ENABLE", False,
         "TEST.ENABLE", True,
@@ -120,7 +120,8 @@ if __name__ == "__main__":
 
     logger = logging.get_logger(__name__)
     torch.multiprocessing.set_start_method("forkserver")
-    os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3,4,5,6,7"
+    # os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3,4,5,6,7"
+    os.environ["CUDA_VISIBLE_DEVICES"]="7"
     for i in range(8):
         opts = [
             "TRAIN.ENABLE", False,

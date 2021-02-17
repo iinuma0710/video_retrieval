@@ -34,6 +34,7 @@ from . import hooks
 from .train_loop import SimpleTrainer
 
 __all__ = ["default_argument_parser", "default_setup", "DefaultPredictor", "DefaultTrainer"]
+TV_STATIONS = ["bs1", "etv", "fuji", "net", "NHK", "ntv", "tbs", "tvtokyo"]
 
 
 def default_argument_parser():
@@ -50,13 +51,33 @@ def default_argument_parser():
     # 特徴ベクトルを保存しておく npy ファイル
     parser.add_argument("--npy", default="", metavar="FILE", help="path to features file")
     # retrieval_system で読み込む設定
-    parser.add_argument('--data_dir', type=str)
+    parser.add_argument('--data_dir', type=str, default="")
     parser.add_argument('--query_video', type=str)
     parser.add_argument('--person_ret_num', type=int, default=5000)
     parser.add_argument('--action_ret_num', type=int, default=100)
     parser.add_argument('--add_to_gallery', action="store_true")
     parser.add_argument('--save_result', action="store_true")
     parser.add_argument('--person_detection', action="store_true")
+    # 処理する映像を指定するための設定
+    parser.add_argument('-s', '--tv_station', type=str, choices=TV_STATIONS)
+    parser.add_argument('-y', '--year', type=int, default=2021)
+    parser.add_argument('-m', '--month', type=int, default=2)
+    parser.add_argument('-d', '--day', type=int, default=7)
+    # 番組ごとに指定する場合は番組名をカンマ区切りで指定 (この場合には --data_dir も必ず指定する)
+    parser.add_argument('--programs', type=str, default="")
+    # 任意の録画ディレクトリを指定 (この場合には --data_dir も必ず指定する)
+    parser.add_argument('--recorded_dir', type=str, default="")
+    parser.add_argument('--shots_dir', type=str, default="")
+    parser.add_argument('--detected_dir', type=str, default="")
+    parser.add_argument('--features_dir', type=str, default="")
+    parser.add_argument('--tmp_dir', type=str, default="")
+    # 処理内容を指示する
+    parser.add_argument('--all', action="store_true")
+    parser.add_argument('--split', action="store_true")
+    parser.add_argument('--detection', action="store_true")
+    parser.add_argument('--extraction', action="store_true")
+    # 並列処理数の指定
+    parser.add_argument('--cpu_num', type=int, default=16)
 
     parser.add_argument(
         "--finetune",

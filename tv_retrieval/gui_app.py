@@ -7,14 +7,14 @@ import numpy as np
 from flask import request
 from flask import Flask, render_template
 # 引数の取得
-sys.path.append("./fast-reid")
+sys.path.append("../fast-reid")
 from fastreid.engine import default_argument_parser
 # 人物映像の検出
-from detection_2 import HumanDetectionAndTracking
+from detection import HumanDetectionAndTracking
 # 人物特徴の抽出
-from person_feature import feature_extractor as person_feature_extractor
+from person_feature import feature_extractor_from_video as person_feature_extractor
 # 動作特徴の抽出
-from action_feature import feature_extractor as action_feature_extractor
+from action_feature import feature_extractor_from_video as action_feature_extractor
 
 app = Flask(__name__)
 
@@ -44,14 +44,14 @@ def retrieval_person_action(args):
         
     # 人物の検索
     print("Retrieving with person features ...")
-    person_query_fv = person_feature_extractor([args.query_video], args)[0]
+    person_query_fv = person_feature_extractor(args.query_video, args)
     person_gallery_fvs = np.array([person_fvs[int(d[1])] for d in data_list])
     person_result = cosine_similarity(person_query_fv, person_gallery_fvs, args.person_ret_num)
     refined_data_list = [data_list[i] for i in person_result]
 
     # 動作の検索
     print("Retrieving with action features ...")
-    action_query_fv = action_feature_extractor([args.query_video])[0]
+    action_query_fv = action_feature_extractor(args.query_video)
     action_gallery_fvs = np.array([action_fvs[int(d[0])] for d in refined_data_list])
     action_result = l2_similarity(action_query_fv, action_gallery_fvs, args.action_ret_num)
     result_data_list = [refined_data_list[i] for i in action_result]
@@ -70,7 +70,7 @@ def retrieval_person(args):
         
     # 人物の検索
     print("Retrieving with person features ...")
-    person_query_fv = person_feature_extractor([args.query_video], args)[0]
+    person_query_fv = person_feature_extractor(args.query_video, args)
     person_gallery_fvs = np.array([person_fvs[int(d[1])] for d in data_list])
     person_result = cosine_similarity(person_query_fv, person_gallery_fvs, args.person_ret_num)
     refined_data_list = [data_list[i] for i in person_result]
@@ -89,7 +89,7 @@ def retrieval_action(args):
         
     # 動作の検索
     print("Retrieving with action features ...")
-    action_query_fv = action_feature_extractor([args.query_video])[0]
+    action_query_fv = action_feature_extractor(args.query_video)
     action_gallery_fvs = np.array([action_fvs[int(d[0])] for d in data_list])
     action_result = l2_similarity(action_query_fv, action_gallery_fvs, args.action_ret_num)
     result_data_list = [data_list[i] for i in action_result]
@@ -109,13 +109,13 @@ def retrieval_person_action_fusion(args):
         
     # 人物の検索
     print("Retrieving with person features ...")
-    person_query_fv = person_feature_extractor([args.query_video], args)[0]
+    person_query_fv = person_feature_extractor(args.query_video, args)
     person_gallery_fvs = np.array([person_fvs[int(d[1])] for d in data_list])
     person_sim = np.array([np.dot(fv, person_query_fv) for fv in person_gallery_fvs])
 
     # 動作の検索
     print("Retrieving with action features ...")
-    action_query_fv = action_feature_extractor([args.query_video])[0]
+    action_query_fv = action_feature_extractor(args.query_video)
     action_gallery_fvs = np.array([action_fvs[int(d[0])] for d in data_list])
     action_sim = np.array([np.dot(fv, action_query_fv) for fv in action_gallery_fvs])
 
@@ -144,6 +144,7 @@ def retrieval():
 		args.gallery_features_csv = os.path.join(args.data_dir, "features.csv")
 		args.gallery_action_features_npy = os.path.join(args.data_dir, "action_features.npy")
 		args.gallery_person_features_npy = os.path.join(args.data_dir, "person_features.npy")
+		
 		# 検索を行う
 		if request.form.get('person_only'):
 			file_list = retrieval_person(args)
@@ -153,6 +154,16 @@ def retrieval():
 			file_list = retrieval_person_action_fusion(args)
 		else:
 			file_list = retrieval_person_action(args)
+
+		# ファイルのパスを絶対パスに変換
+		new_file_list = []
+		for f in file_list:
+			if not os.path.isabs(f):
+				new_file_list.append(os.path.abspath(f))
+			else:
+				new_file_list.append(f)
+		file_list = new_file_list
+		
 		# 共通のパスを取得し，static/ ディレクトリ以下にシンボリックリンクを貼る
 		common_path = os.path.commonpath(file_list)
 		os.symlink(common_path, static_gallery_video_dir)
@@ -192,13 +203,15 @@ def query():
 	if request.method == 'POST':
 		# HTMLからディレクトリのパスを取得
 		video_path = request.form.get("video_path")
+		if not os.path.isabs(video_path):
+			video_path = os.path.abspath(video_path)
 		
 		# 映像が指定されたときは人物の検出を行う
 		if os.path.isfile(video_path):
 			save_dir = request.form.get("save_dir")
 			if not os.path.exists(save_dir):
 				os.mkdir(save_dir)
-			detector = HumanDetectionAndTracking(input_video=video_path, output_dir=save_dir)
+			detector = HumanDetectionAndTracking(input_dir=None, output_dir=save_dir, input_video=video_path)
 			file_list = detector.detect_and_track_human()
 		# ディレクトリが指定された場合にはディレクトリ内の全ての映像を列挙
 		elif os.path.isdir(video_path):

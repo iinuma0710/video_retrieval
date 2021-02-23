@@ -2,19 +2,20 @@ import os
 import csv
 import sys
 import glob
+import random
 import numpy as np
 # GUI アプリ向け
 from flask import request
 from flask import Flask, render_template
-# 引数の取得
-sys.path.append("../fast-reid")
-from fastreid.engine import default_argument_parser
-# 人物映像の検出
-from detection import HumanDetectionAndTracking
-# 人物特徴の抽出
-from person_feature import feature_extractor_from_video as person_feature_extractor
-# 動作特徴の抽出
-from action_feature import feature_extractor_from_video as action_feature_extractor
+# # 引数の取得
+# sys.path.append("../fast-reid")
+# from fastreid.engine import default_argument_parser
+# # 人物映像の検出
+# from detection import HumanDetectionAndTracking
+# # 人物特徴の抽出
+# from person_feature import feature_extractor_from_video as person_feature_extractor
+# # 動作特徴の抽出
+# from action_feature import feature_extractor_from_video as action_feature_extractor
 
 app = Flask(__name__)
 
@@ -233,6 +234,22 @@ def query():
 		return render_template('query.html', file_list=file_list, display_file_list=display_file_list, file_num=len(file_list))
 	else:
 		return render_template('query.html', file_list=[], display_file_list=[], file_num=0)
+
+
+# テレビ映像の人物映像の中からランダムにクエリの候補を表示するページ
+@app.route('/random_query', methods=['POST', 'GET'])
+def random_query():
+	if request.method == 'POST':
+		# 表示件数の取得
+		limit = int(request.form.get('radio'))
+		# 処理済みのテレビの人物映像の一覧を取得する
+		query_candidate_list = glob.glob("static/detected/*/*/*/*.mp4")
+		query_list = random.sample(query_candidate_list, limit)
+		full_path_list = [os.path.join(os.getcwd(), "data", q[7:]) for q in query_list]
+		return render_template('random_query.html', file_list=full_path_list, display_file_list=query_list, file_num=len(query_list))
+	else:
+		return render_template('random_query.html', file_list=[], display_file_list=[], file_num=0)
+
 
 
 if __name__ == '__main__':

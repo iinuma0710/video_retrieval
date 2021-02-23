@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>ランダムクエリ選択</title>
+    </head>
+    <body>
+        <h1>検索用のクエリをランダムに探すページ</h1>
+        <form action="/random_query" method="POST" enctype="multipart/form-data">
+            <h3>クエリ映像のパス：</h3>
+            <input checked type="radio" id="r1" name="radio" value="20">
+            <label for="r1">20件</label>
+            <input type="radio" id="r2" name="radio" value="40">
+            <label for="r2">40件</label>
+            <input type="radio" id="r3" name="radio" value="60">
+            <label for="r3">60件</label>
+            <input type="radio" id="r4" name="radio" value="80">
+            <label for="r4">80件</label>
+            <input type="radio" id="r5" name="radio" value="100">
+            <label for="r5">100件</label>
+            <input type="submit" value="クエリ候補の表示">
+        </form>
+
+        <h3>クエリ映像の候補 ({{ file_num }}件)：</h3>
+        <ul>
+            {% for i in range(file_num) %}
+            <li>
+                <!-- <p>{{ file_list[i] }}</p> -->
+                <video src="{{ display_file_list[i] }}" height="300" onclick="copyPathToClipboard(event)" data-path="{{ file_list[i] }}" loop autoplay muted></video>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <script>
+            function copyPathToClipboard(e) {
+                video_path = e.currentTarget.getAttribute('data-path');
+                navigator.clipboard.writeText(video_path);
+                console.log(video_path);
+            }
+        </script>
+
+        <style>
+            ul {
+                width: auto;
+            }
+
+            li {
+                /* margin: 5px; */
+                float: left;
+                text-align: center;
+                width: 310px;
+                height: 310px;
+                list-style: none;
+            }
+
+            video {
+                max-width: 300px;
+                max-height: 300px;
+            }
+        </style>
+    </body>
+</html>

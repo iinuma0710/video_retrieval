@@ -3,51 +3,51 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>検索ページ</title>
+    <title>Retrieval Page</title>
   </head>
   <body>
-    <h1>動画検索のページ</h1>
+    <h1>Video retrieval</h1>
     
     <form action="/retrieval" method="POST" enctype="multipart/form-data">
-      <h3>クエリ映像のパス：</h3>
-      <input type="text" name="query_video" placeholder="クエリ動画のフルパス">
-      <h3>検索対象の情報を格納したディレクトリ：</h3>
-      <input type="text" name="gallery_dir" placeholder="検索対象の特徴ベクトル・CSV">
-      <h3>人物検索の上限数：</h3>
+      <h3>Path to the query video：</h3>
+      <input type="text" name="query_video" placeholder="Query video">
+      <h3>Path to the data directory：</h3>
+      <input type="text" name="gallery_dir" placeholder="Data directory">
+      <h3>Upper limit of person retrieval：</h3>
       <input type="text" name="person_ret_num" value="5000">
-      <h3>検索結果の表示件数：</h3>
+      <h3>The number of the results：</h3>
       <input type="text" name="action_ret_num" value="100">
       <br><br>
-      <label for="add_to_query">クエリをデータベースに追加：</label>
-      <input type="checkbox" id="add_to_query" name="add_to_query" value=1>
-      <br>
-      <label for="person_only">人物検索のみを行う：</label>
+      <!-- <label for="add_to_query">クエリをデータベースに追加：</label> -->
+      <!-- <input type="checkbox" id="add_to_query" name="add_to_query" value=1> -->
+      <!-- <br> -->
+      <label for="person_only">Only person retrieval：</label>
       <input type="checkbox" id="person_only" name="person_only" value=1>
       <br>
-      <label for="action_only">動作検索のみを行う：</label>
+      <label for="action_only">Only action retrieval：</label>
       <input type="checkbox" id="action_only" name="action_only" value=1>
       <br>
-      <label for="fusion">検索結果をフュージョンする：</label>
+      <label for="fusion">Fusion retrieval：</label>
       <input type="checkbox" id="fusion" name="fusion" value=1>
       <br><br><br>
-      <input type="submit" value="検索">
+      <input type="submit" value="Retrieval">
     </form>
 
-    <h2>検索結果 ({{ file_num }}件)：</h2>
+    <h2>Retrieval Results ({{ file_num }} videos)：</h2>
     {% for i in range(file_num) %}
       <p>{{ i + 1 }} : {{ file_list[i] }}</p>
       <div>
-        <label for="{{ action_id_list[i] }}">動作 {{ i + 1 }}：</label>
+        <label for="{{ action_id_list[i] }}">Action {{ i + 1 }}：</label>
         <input type="checkbox" id="{{ action_id_list[i] }}" value=1>，
-        <label for="{{ person_id_list[i] }}">人物 {{ i + 1 }}：</label>
+        <label for="{{ person_id_list[i] }}">Person {{ i + 1 }}：</label>
         <input type="checkbox" id="{{ person_id_list[i] }}" value=1>
       </div>
       <video src="{{ display_file_list[i] }}" loop autoplay muted></video>
     {% endfor %}
 
     <div>
-      <input type="button" value="AP を計算" onclick="buttonClick()">
-      <label for="exclude_top">1位の結果を計算から除外する：</label>
+      <input type="button" value="Calculate AP" onclick="buttonClick()">
+      <label for="exclude_top">Remove Top 1 retrieval：</label>
       <input type="checkbox" id="exclude_top" value=1>
     </div>
   </body>
@@ -87,6 +87,6 @@
     person_ap = person_correct_num == 0 ? 0.0 : person_ap / person_correct_num
 
 
-    alert("動作認識：" + action_ap + " (" + action_correct_num + "/" + action_total_num +")\n人物同定：" + person_ap + " (" + person_correct_num + "/" + person_total_num +")");
+    alert("Action retrieval：" + action_ap + " (" + action_correct_num + "/" + action_total_num +")\nPerson retrieval：" + person_ap + " (" + person_correct_num + "/" + person_total_num +")");
   }
 </script>

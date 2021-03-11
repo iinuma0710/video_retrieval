@@ -251,6 +251,86 @@ def random_query():
 		return render_template('random_query.html', file_list=[], display_file_list=[], file_num=0)
 
 
+@app.route('/query_retrieval', methods=['POST', 'GET'])
+def query_retrieval():
+	# 以前のシンボリックリンクがないか確認
+	static_query_video_dir = "static/query_videos"
+	if os.path.exists(static_query_video_dir):
+		os.unlink(static_query_video_dir)
+	static_gallery_video_dir = "static/gallery_videos"
+	if os.path.exists(static_gallery_video_dir):
+		os.unlink(static_gallery_video_dir)
+	
+	if request.method == 'POST':
+		# 検索に必要な情報を取得する
+		args = default_argument_parser().parse_args()
+		args.query_video = request.form.get('radio')
+		args.data_dir = "./data/tv/features/" # ここを変更
+		args.person_ret_num = int(request.form.get("person_ret_num"))
+		args.action_ret_num = int(request.form.get("action_ret_num"))
+		args.gallery_features_csv = os.path.join(args.data_dir, "features.csv")
+		args.gallery_action_features_npy = os.path.join(args.data_dir, "action_features.npy")
+		args.gallery_person_features_npy = os.path.join(args.data_dir, "person_features.npy")
+		
+		# 検索を行う
+		if request.form.get('person_only'):
+			file_list = retrieval_person(args)
+		elif request.form.get('action_only'):
+			file_list = retrieval_action(args)
+		elif request.form.get('fusion'):
+			file_list = retrieval_person_action_fusion(args)
+		else:
+			file_list = retrieval_person_action(args)
+		# file_list = glob.glob("/home/yuko/data/documents/大学・大学院/佐藤真一研究室/20210202_修論/資料/videos/*.mp4")
+
+		# ファイルのパスを絶対パスに変換
+		new_file_list = []
+		for f in file_list:
+			if not os.path.isabs(f):
+				new_file_list.append(os.path.abspath(f))
+			else:
+				new_file_list.append(f)
+		file_list = new_file_list
+		
+		# 共通のパスを取得し，static/ ディレクトリ以下にシンボリックリンクを貼る
+		common_path = os.path.commonpath(file_list)
+		os.symlink(common_path, static_gallery_video_dir)
+		display_file_list = [f.replace(common_path, static_gallery_video_dir) for f in file_list]
+		file_num = len(file_list)
+		action_id_list = ["action_" + str(i + 1) for i in range(file_num)]
+		person_id_list = ["person_" + str(i + 1) for i in range(file_num)]
+
+		return render_template(
+			'query_retrieval.html',
+			query_candidate_list=[request.form.get('radio')],
+			display_query_list=[request.form.get('radio')],
+			query_candidate_num=1,
+			file_list=file_list,
+			display_file_list=display_file_list,
+			file_num=file_num,
+			action_id_list=action_id_list,
+			person_id_list=person_id_list
+		)
+	else:
+		query_candidate_list = glob.glob("static/detected/*/*/*/*.mp4")
+		# query_candidate_list = glob.glob("/home/yuko/data/documents/大学・大学院/佐藤真一研究室/20210202_修論/資料/videos/*.mp4")
+		query_candidate_list = random.sample(query_candidate_list, 7)
+		common_path = os.path.commonpath(query_candidate_list)
+		os.symlink(common_path, static_query_video_dir)
+		display_query_list = [f.replace(common_path, static_query_video_dir) for f in query_candidate_list]
+
+		return render_template(
+			'query_retrieval.html',
+			query_candidate_list=query_candidate_list,
+			display_query_list=display_query_list,
+			query_candidate_num=len(query_candidate_list),
+			file_list=[],
+			display_file_list=[],
+			file_num=0,
+			action_id_list=[],
+			person_id_list=[]
+		)
+
 
 if __name__ == '__main__':
 	app.run()

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Query Selection and Retrieval</title>
+    </head>
+    <body>
+        <h1>Select Query and Retrieve Videos</h1>
+
+        <h3>
+            <form action="/query_retrieval" method="GET" enctype="multipart/form-data">
+                Query <input type="submit" value="Display">
+            </form>
+        </h3>
+
+        <form action="/query_retrieval" method="POST" enctype="multipart/form-data">
+            {% for i in range(query_candidate_num) %}
+                <input checked type="radio" id="{{ query_candidate_list[i] }}" name="radio" value="{{ display_query_list[i] }}" class="radio-button">
+                <label for="{{ query_candidate_list[i] }}">
+                    <video src="{{ display_query_list[i] }}" height="200" loop autoplay muted></video>
+                </label>
+            {% endfor %}
+
+            {% if file_num==0 %}
+                <div>Upper limit of person retrieval：<input type="text" name="person_ret_num" value="5000"></div>
+                <div>The number of the results：<input type="text" name="action_ret_num" value="100"></div>
+                <label for="person_only">Only person retrieval：</label>
+                <input type="checkbox" id="person_only" name="person_only" value=1>
+                <br>
+                <label for="action_only">Only action retrieval：</label>
+                <input type="checkbox" id="action_only" name="action_only" value=1>
+                <br>
+                <label for="fusion">Fusion retrieval：</label>
+                <input type="checkbox" id="fusion" name="fusion" value=1>
+                <br>
+                <input type="submit" value="Retrieval">
+            {% endif %}
+        </form>
+
+        <h2>Retrieval Results ({{ file_num }} videos)：</h2>
+        <div>
+            <input type="button" value="Calculate AP" onclick="buttonClick()">
+            <label for="exclude_top">Remove Top 1 retrieval：</label>
+            <input type="checkbox" id="exclude_top" value=1>
+        </div>
+        <div>
+            <ul>
+                {% for i in range(file_num) %}
+                    <li>
+                        <label for="{{ action_id_list[i] }}">Top {{ i + 1 }} Action：</label>
+                        <input type="checkbox" id="{{ action_id_list[i] }}" value=1>
+                        <br>
+                        <label for="{{ person_id_list[i] }}">Top {{ i + 1 }} Person：</label>
+                        <input type="checkbox" id="{{ person_id_list[i] }}" value=1>
+                        <br>
+                        <video src="{{ display_file_list[i] }}" loop autoplay muted></video>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <script>
+            var action_id_list = {{ action_id_list | tojson }};
+            var person_id_list = {{ person_id_list | tojson }};
+
+            function buttonClick() {
+                var exclude_top = document.getElementById("exclude_top").checked;
+
+                var action_total_num = 0;
+                var action_correct_num = 0;
+                var action_ap = 0.0;
+                for (let action_id of action_id_list) {
+                    if (exclude_top && action_id === "action_1") { continue }
+                    action_total_num += 1
+                    if (document.getElementById(action_id).checked) {
+                        action_correct_num += 1;
+                        action_ap += action_correct_num / action_total_num
+                    }
+                }
+                action_ap = action_correct_num == 0 ? 0.0 : action_ap / action_correct_num
+
+                var person_total_num = 0;
+                var person_correct_num = 0;
+                var person_ap = 0.0;
+                for (let person_id of person_id_list) {
+                    if (exclude_top && person_id === "person_1") { continue }
+                    person_total_num += 1
+                    if (document.getElementById(person_id).checked) {
+                        person_correct_num += 1;
+                        person_ap += person_correct_num / person_total_num
+                    }
+                }
+                person_ap = person_correct_num == 0 ? 0.0 : person_ap / person_correct_num
+
+
+                alert("Action retrieval：" + action_ap + " (" + action_correct_num + "/" + action_total_num +")\nPerson retrieval：" + person_ap + " (" + person_correct_num + "/" + person_total_num +")");
+            }
+        </script>
+
+        <style>
+            ul {
+                width: auto;
+            }
+
+            li {
+                /* margin: 5px; */
+                float: left;
+                text-align: center;
+                width: 210px;
+                height: 280px;
+                list-style: none;
+                vertical-align:middle;
+            }
+
+            video {
+                max-width: 200px;
+                max-height: 200px;
+                vertical-align:middle;
+                margin: auto;
+            }
+
+            .radio-button {
+                vertical-align:middle;
+            }
+        </style>
+    </body>
+</html>

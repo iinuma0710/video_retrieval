@@ -9,7 +9,7 @@
         <h1>Select Query and Retrieve Videos</h1>
 
         <form action="/query_retrieval" method="GET" enctype="multipart/form-data">
-            <h3>Query</h3> 
+            <h2>Query Selection</h2> 
             <input type="radio" id="query_trecvid" name="query_select" value="trecvid" class="radio-button">
             <label for="query_trecvid">TRECVID INS Dataset</label>
             <input checked type="radio" id="query_tv" name="query_select" value="tv" class="radio-button">
@@ -24,29 +24,28 @@
                     <video src="{{ display_query_list[i] }}" height="200" loop autoplay muted></video>
                 </label>
             {% endfor %}
+            <br><br>
+            <div>Enter query video path directly：<input type="text" name="query_path" size="150"></div>
+            <h2>Retrieval conditions</h2> 
+            <div>
+                Retrieve from : 
+                <input type="radio" id="retrieve_trecvid" name="retrieve_from" value="trecvid" class="radio-button">
+                <label for="retrieve_trecvid">TRECVID INS Dataset</label>
+                <input checked type="radio" id="retrieve_tv" name="retrieve_from" value="tv" class="radio-button">
+                <label for="retrieve_tv">Japanese TV Programs</label>
+            </div>
+            <div>Upper limit of person retrieval：<input type="text" name="person_ret_num" value="5000"></div>
+            <div>The number of the results：<input type="text" name="action_ret_num" value="100"></div>
+            <label for="person_only">Only person retrieval：</label>
+            <input type="checkbox" id="person_only" name="person_only" value=1>
             <br>
-            <h3>Retrieval conditions</h3> 
-            {% if file_num==0 %}
-                <div>
-                    Retrieve from : 
-                    <input type="radio" id="retrieve_trecvid" name="retrieve_from" value="trecvid" class="radio-button">
-                    <label for="retrieve_trecvid">TRECVID INS Dataset</label>
-                    <input checked type="radio" id="retrieve_tv" name="retrieve_from" value="tv" class="radio-button">
-                    <label for="retrieve_tv">Japanese TV Programs</label>
-                </div>
-                <div>Upper limit of person retrieval：<input type="text" name="person_ret_num" value="5000"></div>
-                <div>The number of the results：<input type="text" name="action_ret_num" value="100"></div>
-                <label for="person_only">Only person retrieval：</label>
-                <input type="checkbox" id="person_only" name="person_only" value=1>
-                <br>
-                <label for="action_only">Only action retrieval：</label>
-                <input type="checkbox" id="action_only" name="action_only" value=1>
-                <br>
-                <label for="fusion">Fusion retrieval：</label>
-                <input type="checkbox" id="fusion" name="fusion" value=1>
-                <br>
-                <input type="submit" value="Retrieval">
-            {% endif %}
+            <label for="action_only">Only action retrieval：</label>
+            <input type="checkbox" id="action_only" name="action_only" value=1>
+            <br>
+            <label for="fusion">Fusion retrieval：</label>
+            <input type="checkbox" id="fusion" name="fusion" value=1>
+            <br>
+            <input type="submit" value="Retrieval">
         </form>
 
         <h2>Retrieval Results ({{ file_num }} videos)：</h2>
@@ -65,7 +64,7 @@
                         <label for="{{ person_id_list[i] }}">Action + Person：</label>
                         <input type="checkbox" id="{{ person_id_list[i] }}" value=1>
                         <br>
-                        <video src="{{ display_file_list[i] }}" loop autoplay muted></video>
+                        <video src="{{ display_file_list[i] }}" onclick="copyPathToClipboard(event)" data-path="{{ file_list[i] }}" loop autoplay muted></video>
                     </li>
                 {% endfor %}
             </ul>
@@ -105,6 +104,12 @@
                 person_ap = person_correct_num == 0 ? 0.0 : person_ap / person_correct_num
 
                 alert("Action retrieval：" + (action_ap * 100).toFixed(1) + "% (" + action_correct_num + "/" + action_total_num +")\nPerson + Action：" + (person_ap * 100).toFixed(1) + " %(" + person_correct_num + "/" + person_total_num + ")");
+            }
+
+            function copyPathToClipboard(e) {
+                video_path = e.currentTarget.getAttribute('data-path');
+                navigator.clipboard.writeText(video_path);
+                console.log(video_path);
             }
         </script>
 

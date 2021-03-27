@@ -265,11 +265,17 @@ def query_retrieval():
 	if request.method == 'POST':
 		# 検索に必要な情報を取得する
 		args = default_argument_parser().parse_args()
-		args.query_video = request.form.get('radio')
+
+		if request.form.get("query_path") != "":
+			args.query_video = request.form.get("query_path")
+		else:
+			args.query_video = request.form.get('radio')
+		
 		if request.form.get('retrieve_from') == "trecvid":
 			args.data_dir = "/home/iinuma/per610a/video_retrieval/data/retrieval_data/"
 		else:
 			args.data_dir = "./data/features/2021_02_07_bs1_etv_nhk/"
+		
 		args.person_ret_num = int(request.form.get("person_ret_num"))
 		args.action_ret_num = int(request.form.get("action_ret_num"))
 		args.gallery_features_csv = os.path.join(args.data_dir, "features.csv")

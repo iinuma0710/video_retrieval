@@ -3,19 +3,20 @@ import csv
 import sys
 import glob
 import random
+import shutil
 import numpy as np
 # GUI アプリ向け
 from flask import request
 from flask import Flask, render_template
-# # 引数の取得
-# sys.path.append("../fast-reid")
-# from fastreid.engine import default_argument_parser
-# # 人物映像の検出
-# from detection import HumanDetectionAndTracking
-# # 人物特徴の抽出
-# from person_feature import feature_extractor_from_video as person_feature_extractor
-# # 動作特徴の抽出
-# from action_feature import feature_extractor_from_video as action_feature_extractor
+# 引数の取得
+sys.path.append("../fast-reid")
+from fastreid.engine import default_argument_parser
+# 人物映像の検出
+from detection import HumanDetectionAndTracking
+# 人物特徴の抽出
+from person_feature import feature_extractor_from_video as person_feature_extractor
+# 動作特徴の抽出
+from action_feature import feature_extractor_from_video as action_feature_extractor
 
 app = Flask(__name__)
 
@@ -265,7 +266,10 @@ def query_retrieval():
 		# 検索に必要な情報を取得する
 		args = default_argument_parser().parse_args()
 		args.query_video = request.form.get('radio')
-		args.data_dir = "./data/tv/features/" # ここを変更
+		if request.form.get('retrieve_from') == "trecvid":
+			args.data_dir = "/home/iinuma/per610a/video_retrieval/data/retrieval_data/"
+		else:
+			args.data_dir = "./data/features/2021_02_07_bs1_etv_nhk/"
 		args.person_ret_num = int(request.form.get("person_ret_num"))
 		args.action_ret_num = int(request.form.get("action_ret_num"))
 		args.gallery_features_csv = os.path.join(args.data_dir, "features.csv")
@@ -281,7 +285,6 @@ def query_retrieval():
 			file_list = retrieval_person_action_fusion(args)
 		else:
 			file_list = retrieval_person_action(args)
-		# file_list = glob.glob("/home/yuko/data/documents/大学・大学院/佐藤真一研究室/20210202_修論/資料/videos/*.mp4")
 
 		# ファイルのパスを絶対パスに変換
 		new_file_list = []
@@ -300,10 +303,15 @@ def query_retrieval():
 		action_id_list = ["action_" + str(i + 1) for i in range(file_num)]
 		person_id_list = ["person_" + str(i + 1) for i in range(file_num)]
 
+		# クエリ映像の表示用
+		display_query_video = os.path.join("./static/", os.path.basename(args.query_video))
+		if not os.path.exists(display_query_video):
+			shutil.copyfile(args.query_video, display_query_video)
+
 		return render_template(
 			'query_retrieval.html',
-			query_candidate_list=[request.form.get('radio')],
-			display_query_list=[request.form.get('radio')],
+			query_candidate_list=[display_query_video],
+			display_query_list=[display_query_video],
 			query_candidate_num=1,
 			file_list=file_list,
 			display_file_list=display_file_list,
@@ -312,9 +320,12 @@ def query_retrieval():
 			person_id_list=person_id_list
 		)
 	else:
-		query_candidate_list = glob.glob("static/detected/*/*/*/*.mp4")
-		# query_candidate_list = glob.glob("/home/yuko/data/documents/大学・大学院/佐藤真一研究室/20210202_修論/資料/videos/*.mp4")
-		query_candidate_list = random.sample(query_candidate_list, 7)
+		if request.args.get('query_select', '') == "trecvid":
+			query_candidate_list = glob.glob("/net/per610a/export/das18a/satoh-lab/share/datasets/eastenders/video_detected/*.mp4")
+		else:
+			query_candidate_list = glob.glob("/home/iinuma/per610a/video_retrieval/tv_retrieval/data/detected/*/*/*/*.mp4")
+		
+		query_candidate_list = random.sample(query_candidate_list, 5)
 		common_path = os.path.commonpath(query_candidate_list)
 		os.symlink(common_path, static_query_video_dir)
 		display_query_list = [f.replace(common_path, static_query_video_dir) for f in query_candidate_list]

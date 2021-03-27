@@ -53,6 +53,7 @@ def get_inputs(video_path, num=1):
     
     # ランダムにnumフレームを抜き出してくる
     # 最初の10フレームくらいは他の人が紛れてる可能性があるので除外
+    # print(len(frame_list)-1, video_path)
     indexes = get_randoms(10, len(frame_list)-1, num)
     frames = np.array(frame_list)[indexes]
     # Fast-ReID の入力に合うように torch.tensor に変換して整形

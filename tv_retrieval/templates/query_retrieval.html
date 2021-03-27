@@ -8,21 +8,32 @@
     <body>
         <h1>Select Query and Retrieve Videos</h1>
 
-        <h3>
-            <form action="/query_retrieval" method="GET" enctype="multipart/form-data">
-                Query <input type="submit" value="Display">
-            </form>
-        </h3>
-
+        <form action="/query_retrieval" method="GET" enctype="multipart/form-data">
+            <h3>Query</h3> 
+            <input type="radio" id="query_trecvid" name="query_select" value="trecvid" class="radio-button">
+            <label for="query_trecvid">TRECVID INS Dataset</label>
+            <input checked type="radio" id="query_tv" name="query_select" value="tv" class="radio-button">
+            <label for="query_tv">Japanese TV Programs</label>
+            <input type="submit" value="Display">
+        </form>
+        <br>
         <form action="/query_retrieval" method="POST" enctype="multipart/form-data">
             {% for i in range(query_candidate_num) %}
-                <input checked type="radio" id="{{ query_candidate_list[i] }}" name="radio" value="{{ display_query_list[i] }}" class="radio-button">
+                <input type="radio" id="{{ query_candidate_list[i] }}" name="radio" value="{{ query_candidate_list[i] }}" class="radio-button">
                 <label for="{{ query_candidate_list[i] }}">
                     <video src="{{ display_query_list[i] }}" height="200" loop autoplay muted></video>
                 </label>
             {% endfor %}
-
+            <br>
+            <h3>Retrieval conditions</h3> 
             {% if file_num==0 %}
+                <div>
+                    Retrieve from : 
+                    <input type="radio" id="retrieve_trecvid" name="retrieve_from" value="trecvid" class="radio-button">
+                    <label for="retrieve_trecvid">TRECVID INS Dataset</label>
+                    <input checked type="radio" id="retrieve_tv" name="retrieve_from" value="tv" class="radio-button">
+                    <label for="retrieve_tv">Japanese TV Programs</label>
+                </div>
                 <div>Upper limit of person retrieval：<input type="text" name="person_ret_num" value="5000"></div>
                 <div>The number of the results：<input type="text" name="action_ret_num" value="100"></div>
                 <label for="person_only">Only person retrieval：</label>
@@ -51,7 +62,7 @@
                         <label for="{{ action_id_list[i] }}">Top {{ i + 1 }} Action：</label>
                         <input type="checkbox" id="{{ action_id_list[i] }}" value=1>
                         <br>
-                        <label for="{{ person_id_list[i] }}">Top {{ i + 1 }} Person：</label>
+                        <label for="{{ person_id_list[i] }}">Action + Person：</label>
                         <input type="checkbox" id="{{ person_id_list[i] }}" value=1>
                         <br>
                         <video src="{{ display_file_list[i] }}" loop autoplay muted></video>
@@ -93,8 +104,7 @@
                 }
                 person_ap = person_correct_num == 0 ? 0.0 : person_ap / person_correct_num
 
-
-                alert("Action retrieval：" + action_ap + " (" + action_correct_num + "/" + action_total_num +")\nPerson retrieval：" + person_ap + " (" + person_correct_num + "/" + person_total_num +")");
+                alert("Action retrieval：" + (action_ap * 100).toFixed(1) + "% (" + action_correct_num + "/" + action_total_num +")\nPerson + Action：" + (person_ap * 100).toFixed(1) + " %(" + person_correct_num + "/" + person_total_num + ")");
             }
         </script>
 
